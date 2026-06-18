@@ -1,4 +1,5 @@
 /data/
+/docs/superpowers/
 .venv/
 node_modules/
 dashboard/frontend/dist/
