@@ -55,7 +55,3 @@ Vite serves the React dashboard at http://127.0.0.1:5173 and proxies `/api` to t
 Never commit real runtime data. Keep real personas, profiles, drafts, metrics, incidents, style docs, company facts, and private writing guides under `data/`.
 
 Use `example/data/` for safe templates and sanitized examples. It mirrors the private `data/` folder shape.
-
-
-
-

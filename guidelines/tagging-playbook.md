@@ -44,5 +44,8 @@ Tagged drafts carry higher social risk and deserve closer human review — mark 
 - Event-credit tags need real attendance or direct experience.
 - Investor/founder suggestion tags are acceptable only when the target post asks for a list or recommendation and the tagged people are exact candidates.
 - High-status product/company tags can work as jokes only when the tagged account is central to the visible context. Do not use this as a reach tactic.
+- Cofounder/company milestone tags work when the post is already about the shared work, launch artifact, demo, or progress update. The tag should identify who was actually involved.
+- Product-context tags work when the tagged tool/company is the visible object of the joke or observation. Do not tag a tool just to borrow its audience.
+- Community/event tags work when the persona was actually present or directly part of the group being discussed. Pair them with concrete event/place context.
 
 
