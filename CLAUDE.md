@@ -1,6 +1,6 @@
 # CLAUDE.md — Twitter Engagement Agent (Development Context)
 
-last_updated: 2026-06-13
+last_updated: 2026-06-18
 status: living document — keep in sync with AGENTS.md, 00-requirements.md, 01-spec.md as the system evolves
 
 This file is for whoever (human or agent) does **development work on this Twitter agent** — adding modes, fixing wiring, extending the dashboard, refining playbooks. It is the onboarding doc: read this first to understand what exists, why, and how the pieces fit, then go to the specific file you need to change.
@@ -11,9 +11,9 @@ It is a different document from `AGENTS.md`: `AGENTS.md` is the **behavior contr
 
 ## 1. What We're Building (one paragraph)
 
-A Codex-primary, Claude-Code-interchangeable agent that drives the founders' **real, logged-in Chrome** to browse Twitter/X as a specific persona (Shubham first, Yash second). It decides what's worth replying to, drafts replies/quotes/thread-replies/original tweets in that persona's authentic voice, queues every draft for human review, and — after a human sends — circles back days later to capture analytics and turn outcomes into written rules. The "database" is local CSVs; the "brain" is a set of Markdown guideline files the agent itself keeps rewriting as it learns. A local dashboard is the only UI a human needs — no raw file editing required for day-to-day use.
+A Codex-primary, Claude-Code-interchangeable agent that drives the founders' **real, logged-in Chrome** to browse Twitter/X as a specific persona (Shubham first, Yash second). It decides what's worth replying to, drafts replies/quotes/thread-replies/original tweets in that persona's authentic voice, queues every draft for human review, and — after a human sends — circles back days later to capture analytics and turn outcomes into written rules. The "database" is local CSVs; the "brain" is a set of Markdown guideline files the agent itself keeps rewriting as it learns. A local dashboard is the primary day-to-day UI; raw files remain inspectable and editable for maintenance.
 
-This lives inside the **standalone local workspace** (`this repository`) under `` — a sibling working folder, self-contained, not part of the numbered `0X-*` Markdown KB structure described in the repo root `CLAUDE.md`.
+This lives inside this **standalone local workspace** — a self-contained repository, not part of the numbered `0X-*` Markdown KB structure described in the source KB.
 
 ---
 
@@ -72,7 +72,9 @@ Plus five Shubham-specific checks before recording (read-aloud, actor, contribut
 
 ### 3.5 Dashboard
 
-`dashboard/server.py` (stdlib Python, `python dashboard/server.py`, http://localhost:8787) + `dashboard/static/` (vanilla JS/HTML/CSS). View/edit layer over every file below — drafts queue (approve/edit/discard), config forms (limits/metrics/personas), a "Knowledge" tab that renders the learning/style/guideline Markdown, and agent-run launching. See `dashboard/README.md`.
+`dashboard/server.py` runs a FastAPI backend at http://127.0.0.1:8787 and serves the built Vite React app from `dashboard/frontend/dist`. During frontend development, run the backend plus `npm run dev` and use http://127.0.0.1:5173; Vite proxies `/api` to FastAPI.
+
+The dashboard is a view/edit layer over the same files the modes use: draft review decisions update `data/drafts/` plus the CSV rows, Settings updates `data/config/*.yaml` and active persona state, Knowledge edits Markdown under `data/personas/`, `guidelines/`, `data/style/`, `data/writing/`, and `data/learnings/`, and Run launches a new local PowerShell/Codex session. See `dashboard/README.md`.
 
 ---
 
@@ -99,7 +101,7 @@ Plus five Shubham-specific checks before recording (read-aloud, actor, contribut
   example/data/             Public starter templates and schema-only CSVs
   guidelines/               Public targeting, profile, format, and tagging playbooks
   modes/                    Mode procedures: learn, scroll, compose, send, review
-  dashboard/                Local stdlib Python dashboard
+  dashboard/                Local FastAPI backend + Vite React dashboard
   docs/                     Public docs and implementation notes
   scripts/                  Bootstrap and publish-safety helpers
 ```
@@ -110,9 +112,8 @@ Plus five Shubham-specific checks before recording (read-aloud, actor, contribut
 
 - **Shubham persona** is the only one that's been through `learn`: style doc has 15 `## Confirmed` + 11 `## Tentative` voice patterns from Posts/Replies; `## Framing patterns (from Likes)` exists as an empty section pending a Likes pass; `reply-playbook.md` has real examples seeded for most archetypes; `profiles.csv` has ~44 studied accounts.
 - **Cold-Start Guard** (AGENTS.md §5.1) is satisfied for Shubham (style doc has ≥1 Confirmed entry). Not yet run for Yash.
-- **Dashboard** is built and functional: Drafts/Config/Run/Knowledge tabs all wired to the files above.
-- `data/drafts/discarded/` has ~28 drafts from a real `scroll` session — useful as real examples of what the pipeline currently produces (and what got discarded) when evaluating drafting-quality changes.
-- 
+- **Dashboard** is built and functional: Drafts, Insights, Knowledge, Settings, and Run tabs are wired to the files above.
+- **Private runtime data is intentionally omitted from git.** Use local `data/` for real personas, drafts, metrics, profiles, and writing guides; use `example/data/` for publishable templates only.
 ---
 
 ## 6. Conventions When Extending This System

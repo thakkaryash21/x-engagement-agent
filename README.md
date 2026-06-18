@@ -12,6 +12,8 @@ The agent is human-gated. It drafts and queues content; a human reviews every se
 
 ## Quick Start
 
+Prerequisites: Python 3.11+ and Node.js 20+.
+
 ```powershell
 .\scripts\init-data.ps1
 python -m venv .venv
@@ -21,7 +23,7 @@ npm run build
 .\.venv\Scripts\python dashboard/server.py
 ```
 
-Open http://localhost:8787.
+Open http://127.0.0.1:8787.
 
 For frontend development, run the backend and Vite dev server in separate terminals:
 
@@ -31,6 +33,14 @@ npm run dev
 ```
 
 Vite serves the React dashboard at http://127.0.0.1:5173 and proxies `/api` to the local FastAPI backend.
+
+## Documentation
+
+- [AGENTS.md](AGENTS.md): runtime behavior contract for `learn`, `scroll`, `compose`, `send`, and `review`.
+- [dashboard/README.md](dashboard/README.md): dashboard surfaces, editable files, and current limitations.
+- [docs/data-boundary.md](docs/data-boundary.md): what stays private in `data/` vs. what is safe to publish.
+- [docs/operator-guide.md](docs/operator-guide.md): day-to-day operating checklist.
+- [01-spec.md](01-spec.md): technical spec and data model.
 
 ## Modes
 

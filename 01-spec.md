@@ -1,7 +1,7 @@
 # Twitter Agent — Technical Specification
 
-last_updated: 2026-06-12
-status: updated after Yash's review rounds — Shubham-first, Codex-primary, human-mimicry, layered metrics, guardrails confirmed, dashboard added (§10)
+last_updated: 2026-06-18
+status: updated after standalone migration — Shubham-first, Codex-primary, human-mimicry, layered metrics, guardrails confirmed, FastAPI + React dashboard documented (§10)
 requirements: [00-requirements.md](00-requirements.md)
 
 ---
@@ -392,24 +392,25 @@ A local web app (localhost only, no auth needed beyond the machine itself) that 
 - the three playbooks rendered with their evidence links (click a learning entry → see the underlying drafts and metric rows)
 - profile intelligence table (sortable/filterable on every rubric axis), incident history, draft-queue funnel (drafted → sent → reviewed) and edit-rate trends
 
-**Drafts** — the review queue as cards: target tweet context, the draft, alternates, archetype/format chips, staleness flags, and — prominently, top of card — a **tagging callout** when the draft tags anyone: who, their category/follower tier, and the relationship ("never interacted"). Actions per card: **send**, **edit then send**, **discard**. Edits made here are the same edit-signal capture as §6.3.
+**Drafts** — the review queue as cards: target tweet context, the draft, alternates, archetype/format chips, staleness flags, and — prominently, top of card — a **tagging callout** when the draft tags anyone: who, their category/follower tier, and the relationship ("never interacted"). Actions per card: **approve**, **edit**, **discard**. Approved/edited drafts are still posted only by `send` mode after the human gate.
 
-**Config** — forms over every config surface, so raw files never need to be opened by hand:
-- `limits.yaml` and `metrics.yaml` as typed form fields (capture and optimize lists as toggles/weights)
-- persona files (territory, goals, red lines as editable lists)
-- guideline playbooks and the style doc as rendered, editable Markdown
-- lockout clearing and incident acknowledgment live here too
+**Knowledge** — rendered, editable Markdown for private persona files, public guideline playbooks, learned style docs, private writing guides, and learning docs. Saving writes the canonical Markdown file and updates a `last_updated:` line when present.
 
-**Run** — agent control: pick mode (learn / scroll / compose / send / review), persona, and toggles (`--tagging`); launch; watch live status (current action, drafts produced, session limits remaining); stop button. A locked-out agent shows the lockout reason and the clear control.
+**Settings** — forms over operational config:
+- `limits.yaml` and `metrics.yaml` as editable fields/lists
+- active persona and tagging default
+- incident lockout visibility and acknowledgment
+
+**Run** — agent control: pick mode (learn / scroll / compose / send / review), persona, and toggles (`--tagging`); launch a local PowerShell/Codex session. A locked-out agent shows the lockout reason. Live output streaming and a browser-side stop button are not part of the current simple implementation.
 
 ### 10.2 How UI actions reach the agent
 
 Two patterns, both file-based to keep the no-second-database principle:
 
-- **Config and draft decisions** are direct file writes (update YAML/Markdown, set `status=approved/discarded` in the CSV + move draft files). The agent reads state at session start and during `send` mode.
-- **Launching/stopping the agent** shells out to the Codex CLI with the mode prompt, streaming its output into the Run view. Approving a draft in the UI and clicking send triggers a `send` session scoped to that draft.
+- **Config, knowledge, and draft decisions** are direct file writes (update YAML/Markdown, set `status=approved/edited/discarded` in the CSV + move draft files where appropriate). The agent reads state at session start and during `send` mode.
+- **Launching the agent** shells out to the configured CLI command with the mode prompt in a local PowerShell window. The dashboard records the most recent launch in `dashboard/run-state.json`; the interactive session itself remains outside the browser.
 
-Implementation stack is deliberately not fixed here (plan-level decision); the constraints are: local-only, zero cloud dependencies, reads/writes the canonical files, no daemon required when idle.
+Implementation stack: FastAPI backend, Vite React frontend, and the existing local file store. The constraints remain: local-only, zero cloud dependencies, reads/writes the canonical files, and no external database.
 
 ## 11. Build Phases
 
@@ -423,7 +424,7 @@ Implementation stack is deliberately not fixed here (plan-level decision); the c
 | 6. Tagging + compose | `--tagging` toggle, original-tweet `compose` mode | Used in anger for a week without incident |
 | 7. Dashboard | Local web UI per §10: insights, draft cards with tagging callouts, config forms, run control | Founders operate the system for a full week without opening a raw YAML/CSV/Markdown file |
 
-Phase 3's exit criterion is the real quality bar: if fewer than half the drafts are send-ready, fix the style doc and playbooks before building anything further. Phases 4–6 use the CLI flows directly; the dashboard (phase 7) then becomes the only interface for daily use.
+Phase 3's exit criterion is the real quality bar: if fewer than half the drafts are send-ready, fix the style doc and playbooks before building anything further. Phases 4–6 use the CLI flows directly; the dashboard (phase 7) then becomes the primary interface for daily use.
 
 
 

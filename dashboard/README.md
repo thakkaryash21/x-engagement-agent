@@ -25,7 +25,7 @@ npm run build
 .\.venv\Scripts\python dashboard/server.py
 ```
 
-Then open http://localhost:8787. FastAPI serves the built React dashboard from
+Then open http://127.0.0.1:8787. FastAPI serves the built React dashboard from
 `dashboard/frontend/dist`.
 
 Development mode:

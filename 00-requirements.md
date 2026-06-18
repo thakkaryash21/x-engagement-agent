@@ -1,7 +1,7 @@
 # Twitter Agent — Consolidated Requirements
 
-last_updated: 2026-06-12
-status: reviewed by Yash 2026-06-12 — decisions folded in (see Resolved Decisions)
+last_updated: 2026-06-18
+status: reviewed by Yash 2026-06-12; dashboard implementation notes updated after standalone migration
 companion: [01-spec.md](01-spec.md)
 
 This document takes the raw requirements brain-dump for the Twitter browsing/engagement agent and reorganizes it into a cohesive set of capabilities. Nothing here is invented; every item traces back to a stated requirement. Where the original ask was ambiguous, the ambiguity is flagged in the Open Questions section rather than silently resolved.
@@ -102,14 +102,14 @@ A distinct mode that browses the user's own tweets, replies, and likes to learn.
 - All learnings from the feedback cycle are **appended** to the style/learning guides so future drafts follow them.
 - **Correction rule**: if a previously written "fact" or rule is later contradicted by evidence, it is **rewritten in place** — replaced, not appended-around — so the guides never carry stale context. (Same philosophy already used by `cru-write` Step 8c and the iteration-learnings promotion rule.)
 
-### 10. Dashboard — the only interface the user should need
+### 10. Dashboard — the daily operating interface
 
 A local web UI that sits on top of the file system (files remain the source of truth; the dashboard is a view/edit layer, not a second database):
 
 - **Data insight**: visualizes everything collected — performance by format/archetype/topic/time, profile intelligence, learning entries, incident history.
-- **Configuration**: every config surface (limits, metrics/optimization targets, personas, guideline playbooks) is editable through UI forms. The user should never have to touch raw YAML, Markdown, or CSV files directly.
-- **Agent control**: launching any agent mode (with persona and toggles like `--tagging`) and monitoring its live status happens from the UI.
-- **Action confirmation**: the draft queue is reviewed in the UI — send / edit / discard per draft. Drafts that tag someone carry a prominent callout naming exactly who would be tagged (this is the chosen guardrail for tagging prominent accounts — clear surfacing, not an allowlist). Lockout clearing and incident acknowledgment also happen here.
+- **Configuration**: limits, metrics/optimization targets, active persona, tagging default, personas, guideline playbooks, learned style docs, writing guides, and learning docs are editable from the UI. CSV files remain the durable data store; the dashboard edits them through specific workflows such as draft approval/discard and incident acknowledgment rather than exposing a raw spreadsheet editor.
+- **Agent control**: launching any agent mode (with persona and toggles like `--tagging`) happens from the UI by opening a local PowerShell/Codex session. The dashboard records launch state but does not yet stream the interactive agent session.
+- **Action confirmation**: the draft queue is reviewed in the UI — approve/edit/discard per draft. Drafts that tag someone carry a prominent callout naming exactly who would be tagged (this is the chosen guardrail for tagging prominent accounts — clear surfacing, not an allowlist). Actual posting remains in `send` mode with a human gate.
 
 ---
 
@@ -141,7 +141,7 @@ A local web UI that sits on top of the file system (files remain the source of t
 2. **Location: sibling working folder** under `` in this repo. Confirmed.
 3. **Runtime: Codex CLI primary**, chosen for its browser-use ecosystem. The architecture stays runtime-agnostic so Claude Code can drive the same system when capable; Codex is the primary LM agent.
 4. **ToS posture: maximal human mimicry.** Burst-pause scrolling (scroll a bit, stop, scroll again), character-by-character typing (never paste), and navigation that follows exactly how a human views Twitter. Codified as hard behavioral requirements in pillar 2 and spec §1.1.
-5. **Dashboard as the sole user interface** (pillar 10): data insight, all configuration, agent launching, and action confirmation through a local web UI; no raw file interaction required.
+5. **Dashboard as the daily operating interface** (pillar 10): data insight, configuration, agent launching, and draft-review decisions through a local web UI; raw files remain available for advanced/manual maintenance.
 6. **Tagging guardrail: surfacing, not an allowlist.** Drafts that tag someone are clearly called out in the UI with exactly who is being tagged; the human decides per draft.
 7. **Anti-engagement-bait rule confirmed**: voice and red lines always outrank metrics; the learning loop may never promote a pattern that violates them, however well it performs.
 8. **Cold-start guard confirmed**: `scroll`/`compose` refuse to run without a usable persona style doc from `learn`.

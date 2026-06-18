@@ -1,6 +1,6 @@
 # AGENTS.md — Twitter Engagement Agent
 
-last_updated: 2026-06-13
+last_updated: 2026-06-18
 requirements: [00-requirements.md](00-requirements.md)
 spec: [01-spec.md](01-spec.md)
 
@@ -47,9 +47,9 @@ guidelines/tagging-playbook.md  rules for the --tagging toggle
 guidelines/compose-playbook.md  topic/hook selection for original tweets
 guidelines/format-playbooks/    one file per engagement format: reply, thread-reply, quote, original-tweet
 
-data/style/<persona>-twitter-style.md   personal style doc — OUTPUT of `learn` mode, cornerstone #2 for drafting
-../../data/writing/00_anti_ai_writing_bible.md   cornerstone #3 — final pass on every draft
-../../data/writing/0X_<name>_voice_guide.md      cornerstone #1 — referenced by the persona file
+data/style/<persona>-twitter-style.md           personal style doc — OUTPUT of `learn` mode, cornerstone #2 for drafting
+data/writing/anti-ai-writing-guide.md           cornerstone #3 — final pass on every draft
+data/writing/voice-guides/<name>-voice-guide.md cornerstone #1 — referenced by the persona file
 
 data/data/replies.csv      every reply/thread-reply/quote drafted
 data/data/tweets.csv       every original tweet drafted
@@ -66,8 +66,8 @@ data/learnings/content-playbook.md      what content works (review mode output)
 data/learnings/timing-playbook.md       best post times per content type (review mode output)
 data/learnings/engagement-targets.md    what posts/authors are worth replying to (review mode output)
 
-dashboard/                     local web UI (Phase 7), see dashboard/README.md — view/edit layer over everything above
-dashboard/server.py             stdlib HTTP server + JSON API (run: python dashboard/server.py, http://localhost:8787)
+dashboard/                     local FastAPI + React web UI, see dashboard/README.md — view/edit layer over everything above
+dashboard/server.py             FastAPI entrypoint (run: .\.venv\Scripts\python dashboard/server.py, http://127.0.0.1:8787)
 ```
 
 ---
