@@ -1,0 +1,4 @@
+data_root: data
+agent_command: codex
+dashboard_port: 8787
+

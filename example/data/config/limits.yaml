@@ -1,0 +1,15 @@
+# Twitter Agent — operating limits
+# last_updated: 2026-06-12
+# Conservative defaults per 01-spec.md §6.2 — tune after week one of real use (see
+# 00-requirements.md, Open Question 1). Changes here take effect on the next session;
+# the dashboard's Config surface edits this file directly.
+
+max_drafts_per_session: 15
+session_time_limit_minutes: 45
+max_sends_per_day: 8 # human-approved sends, enforced in send mode
+min_seconds_between_actions: 2
+max_seconds_between_actions: 8
+min_minutes_between_sends: 10
+min_hours_between_same_author: 24 # duplicate-engagement guard (AGENTS.md §5.2)
+draft_staleness_hours: 12 # stale-draft flag threshold (AGENTS.md §5.3)
+

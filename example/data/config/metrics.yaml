@@ -1,0 +1,17 @@
+# Twitter Agent — metrics capture & optimization config
+# last_updated: 2026-06-12
+# Per 01-spec.md §5.2: capture is layered (Layer 1 = public UI metrics, available for
+# any tweet; Layer 2 = analytics panel, available only for the persona's own posts when
+# X exposes it). `optimize` lists are the review loop's objective per format — narrow
+# these once real data shows what matters (00-requirements.md, Open Question 1).
+
+capture:
+  layer1: [views, likes, replies, reposts, quotes, bookmarks]
+  layer2: [impressions, detail_expands, profile_visits, link_clicks, new_follows]
+
+optimize:                      # per format; tune as understanding sharpens
+  reply:       [profile_visits, new_follows, likes]
+  thread_reply: [profile_visits, new_follows, likes]
+  quote:       [impressions, new_follows]
+  tweet:       [impressions, engagement_rate, new_follows]
+
