@@ -1,4 +1,7 @@
 /data/
+.venv/
+node_modules/
+dashboard/frontend/dist/
 *.local.*
 __pycache__/
 *.pyc

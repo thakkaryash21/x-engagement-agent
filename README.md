@@ -13,10 +13,24 @@ The agent is human-gated. It drafts and queues content; a human reviews every se
 ## Quick Start
 
 ```powershell
-.\scripts\init-data.ps1`r`npython dashboard/server.py
+.\scripts\init-data.ps1
+python -m venv .venv
+.\.venv\Scripts\python -m pip install -r requirements.txt
+npm install
+npm run build
+.\.venv\Scripts\python dashboard/server.py
 ```
 
 Open http://localhost:8787.
+
+For frontend development, run the backend and Vite dev server in separate terminals:
+
+```powershell
+.\.venv\Scripts\python dashboard/server.py
+npm run dev
+```
+
+Vite serves the React dashboard at http://127.0.0.1:5173 and proxies `/api` to the local FastAPI backend.
 
 ## Modes
 
