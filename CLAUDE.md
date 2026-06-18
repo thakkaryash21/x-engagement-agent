@@ -32,17 +32,7 @@ The public repo should be reusable. Real personas, real company facts, real draf
 
 ## 3. File Ownership
 
-Use [docs/file-map.md](docs/file-map.md) as the canonical routing guide. It defines what belongs in:
-
-- public runtime files (`AGENTS.md`, `modes/*.md`, `guidelines/*.md`)
-- committed config (`config/*.yaml`)
-- ignored runtime data (`data/**`)
-- CSV database files (`data/csv/*.csv`)
-- draft Markdown templates (`data/drafts/*.md`)
-- public examples (`example/data/**`)
-- dashboard file IO (`dashboard/file_store.py`)
-
-If ownership changes, update `docs/file-map.md` in the same change.
+Use [docs/file-map.md](docs/file-map.md) as the canonical routing guide for file ownership, data boundaries, CSV headers, Markdown database templates, examples, and dashboard file IO. Do not duplicate that structure here. If ownership changes, update `docs/file-map.md` in the same change.
 
 ---
 
