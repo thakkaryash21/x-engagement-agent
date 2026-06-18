@@ -1,17 +1,16 @@
 # AGENTS.md — Twitter Engagement Agent
 
 last_updated: 2026-06-18
-requirements: [00-requirements.md](00-requirements.md)
-spec: [01-spec.md](01-spec.md)
+file_map: [docs/file-map.md](docs/file-map.md)
 
-This file is the behavior contract for any agent (Codex CLI primary, Claude Code interchangeable) operating in this folder. Read this file in full before doing anything else. It is the "OS" — every mode, guard, and pacing rule referenced elsewhere routes through here.
+This file is the behavior contract for any agent operating in this folder. Read this file and [docs/file-map.md](docs/file-map.md) before changing or running anything. `docs/file-map.md` is the source of truth for what belongs in each file and where private/persona-specific data lives.
 
 ---
 
 ## 0. Active Configuration
 
 ```yaml
-persona: shubham        # shubham | yash — change here or pass --persona <name>
+persona: founder-template # set to a file in data/personas/ or pass --persona <name>
 tagging: off            # on | off — pass --tagging to enable for this session only
 ```
 
@@ -29,46 +28,7 @@ Persona files live at `data/personas/<name>.md`. Everything below that says "the
 
 ## 2. File Map
 
-```
-data/personas/<name>.md       active persona: handle, voice guide, style doc, territory, goals, red lines
-config/limits.yaml              draft caps, session time, pacing bounds, send caps
-config/metrics.yaml             which metrics to capture / optimize, per format
-
-modes/learn.md                  detailed `learn` procedure (§4.1)
-modes/scroll.md                 detailed `scroll` procedure (§4.2)
-modes/compose.md                detailed `compose` procedure (§4.3)
-modes/send.md                   detailed `send` procedure (§4.4)
-modes/review.md                 detailed `review` procedure (§4.5)
-
-guidelines/target-posts.md      what kinds of tweets to look for
-guidelines/reply-playbook.md    reply archetypes, when each fits, examples (learn mode adds examples)
-guidelines/profile-rubric.md    how to score/categorize authors; the engage/skip gate
-guidelines/tagging-playbook.md  rules for the --tagging toggle
-guidelines/compose-playbook.md  topic/hook selection for original tweets
-guidelines/format-playbooks/    one file per engagement format: reply, thread-reply, quote, original-tweet
-
-data/style/<persona>-twitter-style.md           personal style doc — OUTPUT of `learn` mode, cornerstone #2 for drafting
-data/writing/anti-ai-writing-guide.md           cornerstone #3 — final pass on every draft
-data/writing/voice-guides/<name>-voice-guide.md cornerstone #1 — referenced by the persona file
-
-data/csv/replies.csv      every reply/thread-reply/quote drafted
-data/csv/tweets.csv       every original tweet drafted
-data/csv/metrics.csv      every analytics capture (layered, §5.2 of spec)
-data/csv/profiles.csv     every author studied
-data/csv/incidents.csv    challenges, lockouts, UI breakage
-data/csv/learn-progress.csv  resume points for `learn` mode (§4.1), per persona/section
-
-data/drafts/*.md            pending human review queue
-data/drafts/sent/           archived after sending
-data/drafts/discarded/      archived after discard
-
-data/learnings/content-playbook.md      what content works (review mode output)
-data/learnings/timing-playbook.md       best post times per content type (review mode output)
-data/learnings/engagement-targets.md    what posts/authors are worth replying to (review mode output)
-
-dashboard/                     local FastAPI + React web UI, see dashboard/README.md — view/edit layer over everything above
-dashboard/server.py             FastAPI entrypoint (run: .\.venv\Scripts\python dashboard/server.py, http://127.0.0.1:8787)
-```
+Use [docs/file-map.md](docs/file-map.md) as the canonical file ownership guide. Markdown files are database state too: preserve headings, metadata, CSV headers, and draft templates unless a documented migration says otherwise.
 
 ---
 
@@ -143,7 +103,7 @@ Walk `data/drafts/` oldest-first. For each draft: existence check, staleness che
 
 ### 4.5 Mode: `review`
 
-Find rows with `status=sent`, `review_due ≤ today`, `reviewed_at` empty. Capture layered metrics (§5.2 of spec, per `config/metrics.yaml`), join to draft metadata, and — only when ≥5 newly reviewed items exist — analyze and write learning entries to the three `data/learnings/*.md` files using the format and correction rule in spec §8.1. **Full procedure: [modes/review.md](modes/review.md)**. Promote high-confidence voice/phrasing rules to `data/style/<persona>-twitter-style.md`; targeting/timing rules and engage-gate tuning stay in `data/learnings/*.md` and `guidelines/profile-rubric.md`.
+Find rows with `status=sent`, `review_due ≤ today`, `reviewed_at` empty. Capture layered metrics from `config/metrics.yaml`, join to draft metadata, and — only when ≥5 newly reviewed items exist — analyze and write learning entries to the three `data/learnings/*.md` files using the format and correction rule in `modes/review.md`. **Full procedure: [modes/review.md](modes/review.md)**. Promote high-confidence voice/phrasing rules to `data/style/<persona>-twitter-style.md`; targeting/timing rules and engage-gate tuning stay in `data/learnings/*.md` and `guidelines/profile-rubric.md`.
 
 ---
 
@@ -162,7 +122,7 @@ Before drafting for a target tweet:
 
 ### 5.3 Send-Time Existence & Staleness Guard (send)
 
-Per spec §6.3: navigate to the target before presenting a draft. If the tweet is deleted, the account is gone/protected, or the reply box is absent, auto-discard with `status=discarded`, reason `target_gone`, move to `drafts/discarded/`. If older than `draft_staleness_hours` or the conversation has visibly moved past the draft's point, flag as stale in the presentation but let the human decide.
+Navigate to the target before presenting a draft. If the tweet is deleted, the account is gone/protected, or the reply box is absent, auto-discard with `status=discarded`, reason `target_gone`, move to `drafts/discarded/`. If older than `draft_staleness_hours` or the conversation has visibly moved past the draft's point, flag as stale in the presentation but let the human decide.
 
 ---
 
@@ -172,7 +132,7 @@ Per spec §6.3: navigate to the target before presenting a draft. If the tweet i
 - **Auto-lockout**: two `type=security` incidents within 7 days → set the lockout (any subsequent Session Bootstrap stops at step 3). Only cleared via the dashboard.
 - **UI breakage** (an expected element isn't found — likely an X redesign): log `type=ui_breakage`, halt the current action, surface to the user. Does **not** count toward the lockout.
 - **Voice outranks metrics**: no mode may draft, or `review` promote, content that violates the persona's voice or red lines — regardless of how well a pattern performs. A high-engagement off-voice outlier is logged as an observation in `data/learnings/content-playbook.md`, never turned into a rule.
-- **No fact invention**: any Cruitical claim in a draft must trace to this repo's `data/company-facts.md` or equivalent. Unknowns are flagged inline in the draft file as `[VERIFY: ...]`, never guessed.
+- **No fact invention**: any company/product/persona claim in a draft must trace to `data/company-facts.md` or another persona-approved local source. Unknowns are flagged inline in the draft file as `[VERIFY: ...]`, never guessed.
 
 ---
 

@@ -1,7 +1,7 @@
 # Compose Playbook — original tweets
 
-last_updated: 2026-06-12
-status: hand-seeded (01-spec.md §4.5) — `review` mode tunes topic/hook choices from `data/learnings/content-playbook.md` and `data/learnings/timing-playbook.md`
+last_updated: 2026-06-18
+status: hand-seeded — `review` mode tunes topic/hook choices from `data/learnings/content-playbook.md` and `data/learnings/timing-playbook.md`
 
 `compose` mode drafts original tweets (not replies). This file defines how a topic and a hook get selected before writing — both are chosen explicitly and recorded in `data/csv/tweets.csv` (`content_type`, `hook_type`) so the review loop can attribute performance to them.
 
@@ -17,7 +17,7 @@ No topic is selected "because it's due" — if nothing in-territory feels genuin
 
 | content_type | Description |
 |---|---|
-| build-update | What's actually happening at Cruitical / in the persona's work — concrete, specific (voice guide: "grounded in specifics") |
+| build-update | What's actually happening in the persona's company/project/work — concrete, specific, and source-backed |
 | take | An opinion or observation, territory-matched |
 | question | A genuine question to the persona's audience — not engagement-bait phrasing |
 | thread | Only when the thought genuinely needs more than one tweet (voice guide: "no threads unless the thought genuinely needs one") |
@@ -37,7 +37,7 @@ Same as `modes/scroll.md` §2.6: persona voice guide → style doc → Anti-AI B
 
 <!-- review mode: once >=5 reviewed sends exist, summarize which content_type/topic
      combinations correlate with the optimize targets in config/metrics.yaml for the
-     `tweet` format. Per the correction rule (01-spec.md §8.1), rewrite in place when
+     `tweet` format. Per the correction rule, rewrite in place when
      contradicted. -->
 
 

@@ -1,10 +1,10 @@
 # Mode: `review` — the 5-day feedback loop
 
-last_updated: 2026-06-12
-status: hand-authored procedure for 01-spec.md §8 / AGENTS.md §4.5
+last_updated: 2026-06-18
+status: hand-authored procedure for AGENTS.md §4.5
 entry point: AGENTS.md §4.5 links here for the full procedure
 
-`review` is read-only with respect to drafting and sending — it never queues or posts anything (AGENTS.md §1). It visits tweets/replies that were sent ≥5 days ago, captures their current performance, and — once enough new data has accumulated — turns that performance into written learnings using the entry format and correction rule from 01-spec.md §8.1. Browses via the same mimicry rules (§3): a review session looks like the persona checking how their old posts did.
+`review` is read-only with respect to drafting and sending — it never queues or posts anything (AGENTS.md §1). It visits tweets/replies that were sent ≥5 days ago, captures their current performance, and — once enough new data has accumulated — turns that performance into written learnings using the entry format and correction rule below. Browses via the same mimicry rules (§3): a review session looks like the persona checking how their old posts did.
 
 Writes to:
 - `data/csv/metrics.csv` (one row per capture; re-captures allowed, latest wins)
@@ -26,7 +26,7 @@ Read `config/metrics.yaml` for `capture.layer1` / `capture.layer2` (what to reco
 
 Scan `data/csv/replies.csv` and `data/csv/tweets.csv` for rows where `status=sent`, `review_due <= today`, and `reviewed_at` is empty. This is the due set for this session. If empty, stop — nothing to review.
 
-## 2. Capture (layered, per §5.2 of the spec)
+## 2. Capture (layered)
 
 For each due item, in order:
 
@@ -43,7 +43,7 @@ For each due item, in order:
 
 If fewer than 5 items were captured in step 2, stop here — the session has done its job (capture + `reviewed_at` stamps) but there isn't enough data for a batch-level finding. Per the confidence ladder (§4 below), single-item evidence never becomes a rule.
 
-If ≥5, join each newly captured `metrics.csv` row back to its `replies.csv`/`tweets.csv` row and look for patterns across these five axes. **Exclude any item with `author_reposted=true` from the math in 3.1-3.4** — an author repost can multiply a reply's reach independent of the archetype/content/timing choice, so crediting it to those would be confounded; instead, log it as its own observation (the fact that the author engaged *is* the signal there, per 01-spec.md §5.2).
+If ≥5, join each newly captured `metrics.csv` row back to its `replies.csv`/`tweets.csv` row and look for patterns across these five axes. **Exclude any item with `author_reposted=true` from the math in 3.1-3.4** — an author repost can multiply a reply's reach independent of the archetype/content/timing choice, so crediting it to those would be confounded; instead, log it as its own observation. The fact that the author engaged is its own signal.
 
 ### 3.1 Reply archetype × target tweet format → `engagement-targets.md`
 
@@ -55,7 +55,7 @@ Group by (`content_type`, `tweet_topic`/`topic`). Same comparison, using `optimi
 
 ### 3.3 Sent day/hour × impressions, per content type → `timing-playbook.md`
 
-Group by (`sent_day_of_week`, `sent_hour_local`, `content_type`/`tweet_format`). Compare `impressions_l2` where available, else `views_l1`. Note in the entry which metric was used (Layer 1 vs Layer 2 — **never compare a Layer-2 value on one item against a Layer-1 proxy on another as if equivalent**, per 01-spec.md §5.2). Candidate entries under `## Entries`.
+Group by (`sent_day_of_week`, `sent_hour_local`, `content_type`/`tweet_format`). Compare `impressions_l2` where available, else `views_l1`. Note in the entry which metric was used (Layer 1 vs Layer 2 — **never compare a Layer-2 value on one item against a Layer-1 proxy on another as if equivalent**). Candidate entries under `## Entries`.
 
 ### 3.4 Target author rubric scores × outcomes → tune `profile-rubric.md`
 
@@ -67,7 +67,7 @@ For items where `user_edited=true`, compare performance against unedited items o
 
 ## 4. Write learning entries
 
-Every new finding from 3.1-3.4 (and 3.5's promotions) is written using the format from 01-spec.md §8.1:
+Every new finding from 3.1-3.4 (and 3.5's promotions) is written using this format:
 
 ```markdown
 ### L-YYYY-MM-DD-NN — <one-line finding>
@@ -93,6 +93,6 @@ Of everything written in step 4, only entries that are (a) about voice/phrasing 
 
 ## Exit criteria
 
-Per 01-spec.md §11 Phase 5: the first batch of ≥5 reviews produces playbook updates the founder agrees with. If a written entry doesn't hold up to the founder's read of the underlying drafts/metrics, that's a signal to revisit the grouping logic in step 3, not to lower the confidence ladder's bar.
+The first batch of ≥5 reviews should produce playbook updates the operator agrees with. If a written entry doesn't hold up to the operator's read of the underlying drafts/metrics, that's a signal to revisit the grouping logic in step 3, not to lower the confidence ladder's bar.
 
 

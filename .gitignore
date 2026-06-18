@@ -1,5 +1,7 @@
 /data/
 /docs/superpowers/
+00-requirements.md
+01-spec.md
 .venv/
 node_modules/
 dashboard/frontend/dist/

@@ -1,7 +1,7 @@
 # Format Playbook — Original Tweet
 
-last_updated: 2026-06-12
-status: hand-seeded (01-spec.md §4.5)
+last_updated: 2026-06-18
+status: hand-seeded
 
 An original tweet (drafted in `compose` mode) has no target tweet — it's posted to the persona's own timeline, for their own followers. Topic and hook selection live in `compose-playbook.md`; this file covers format-specific writing rules once a topic/hook is chosen.
 

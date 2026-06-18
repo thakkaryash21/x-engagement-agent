@@ -1,9 +1,9 @@
 # Tagging Playbook — the `--tagging` toggle
 
-last_updated: 2026-06-13
-status: hand-seeded (01-spec.md §4.4) — `learn` mode seeds real examples from the persona's historical tagging tweets
+last_updated: 2026-06-18
+status: hand-seeded — `learn` mode seeds real examples from the persona's historical tagging tweets into local data
 
-Active only when a `scroll` session runs with `--tagging` (01-spec.md, Operating Modes table — `compose` does not take this flag). When active, the agent additionally considers whether a reply, thread-reply, or quote is *better* composed by tagging a relevant high-profile user, connection, or follower — archetype 7 ("Tag-in") in `reply-playbook.md`.
+Active only when a `scroll` session runs with `--tagging` (`compose` does not take this flag). When active, the agent additionally considers whether a reply, thread-reply, or quote is *better* composed by tagging a relevant high-profile user, connection, or follower — archetype 7 ("Tag-in") in `reply-playbook.md`.
 
 ---
 
@@ -24,25 +24,25 @@ The agent never needs pre-approval to **propose** a tag — only to **send** one
 
 ## Drafting note
 
-Tagged drafts carry higher social risk and deserve closer human review — mark this clearly in the draft file (per the template in 01-spec.md §6.1, add a `**Tags**: @handle (category, follower_tier, relationship)` line directly under the Archetype/Tagging line).
+Tagged drafts carry higher social risk and deserve closer human review — mark this clearly in the draft file by adding a `**Tags**: @handle (category, follower_tier, relationship)` line directly under the Archetype/Tagging line.
 
 ---
 
-## Seeded examples (from `learn` mode)
+## Seeded patterns (from `learn` mode)
 
 <!-- learn mode: collect tweets where the persona tagged someone and it worked —
      genuine value-add, shoutout, or quip. Distill the pattern (what made the tag
      work) here. Real examples only. -->
 
-- Cruitical launch: `@thakkaryash21` and `@trycruitical` were tagged because the post was explicitly about building and launching together. Removing either tag would make the announcement less clear.
-- Introduction credit: a reposted Quivly AI thread thanked `@trycruitical` for making an introduction. The tag works because it documents a real connection, not a reach tactic.
-- Direct joke/context tag: `@ycombinator` appeared in a reply where the joke depended on YC being the addressed account. Use this pattern sparingly and only when the tagged account is already central to the visible thread.
-- Product-fix tag: `@nikitabier plis fix` works only because it is a tiny, informal complaint aimed at the person associated with the product/social-app context. Do not turn this into a general "tag builders for bugs" tactic.
-- Event/community tag: `@fdotinc` appears in demo-festival and Canopy context where Shubham had real-life participation. This is a safe tag pattern when the tagged org is part of the event being discussed.
-- Exact-category plug tag: `@quivlyai` was tagged only after the target post asked for AI agents for customer success. This is acceptable when the tagged company is precisely relevant to the stated need.
-- Tool recommendation tag: `@HappenstanceAI`, `@UseFastlane`, and similar tags work when the target explicitly asks for tools or examples. The tag should name the best-fit tool/person, not a generic friend or high-reach account.
-- Event-credit tag: `@FoundationCap` and `@cmutehq` were tagged because the reply praised a specific event Shubham attended. This pattern needs real attendance or direct experience.
-- Investor/founder suggestion tag: tags like `@aneelr` / `@Soma_Capital` are acceptable only when the target post asks for a list or recommendation and the tagged people are exact candidates.
-- High-status product/company tag: `@OpenAI pls dont acquire and let this thrive` works as a joke because OpenAI is central to the visible AI/startup context. Do not use this as a reach tactic.
+- Launch tags work when the tagged people or company are central to the announcement. Removing the tag should make the post less clear.
+- Introduction-credit tags work when they document a real connection or handoff, not as a reach tactic.
+- Direct joke/context tags work only when the tagged account is already central to the visible thread.
+- Product-fix tags work only when the complaint is tiny, informal, and aimed at the person or team associated with the product context.
+- Event/community tags work when the persona had real-life participation and the tagged organization is part of the event being discussed.
+- Exact-category plug tags are acceptable when the tagged company/person is precisely relevant to a stated need.
+- Tool recommendation tags work when the target explicitly asks for tools or examples. The tag should name the best-fit tool/person, not a generic friend or high-reach account.
+- Event-credit tags need real attendance or direct experience.
+- Investor/founder suggestion tags are acceptable only when the target post asks for a list or recommendation and the tagged people are exact candidates.
+- High-status product/company tags can work as jokes only when the tagged account is central to the visible context. Do not use this as a reach tactic.
 
 

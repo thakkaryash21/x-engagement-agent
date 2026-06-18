@@ -1,7 +1,7 @@
 # Format Playbook — Quote Tweet
 
-last_updated: 2026-06-12
-status: hand-seeded (01-spec.md §4.5)
+last_updated: 2026-06-18
+status: hand-seeded
 
 A quote tweet amplifies the original to the **persona's own followers**. Different reach mechanics from a reply: it spends the persona's own credibility on someone else's content, and it's read by an audience that may never open the quoted tweet.
 

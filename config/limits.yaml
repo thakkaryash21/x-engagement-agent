@@ -1,8 +1,7 @@
 # Twitter Agent — operating limits
-# last_updated: 2026-06-12
-# Conservative defaults per 01-spec.md §6.2 — tune after week one of real use (see
-# 00-requirements.md, Open Question 1). Changes here take effect on the next session;
-# the dashboard's Config surface edits this file directly.
+# last_updated: 2026-06-18
+# Conservative public defaults. Tune after real local use. Changes here take effect on
+# the next session; the dashboard's Settings surface edits this file directly.
 
 max_drafts_per_session: 15
 session_time_limit_minutes: 45

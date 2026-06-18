@@ -1,7 +1,7 @@
 # Mode: `learn` — cold-start procedure
 
-last_updated: 2026-06-13 (added §1.5 Likes pass for framing/engagement patterns)
-status: hand-authored procedure for 01-spec.md §7 / 00-requirements.md pillar 8
+last_updated: 2026-06-18
+status: hand-authored procedure for AGENTS.md §4.1
 entry point: AGENTS.md §4.1 links here for the full procedure
 
 `learn` is a read-only mode: it never drafts and never sends. It browses the active persona's own profile and network — Posts, Replies, and Likes tabs, plus interactions (mimicry rules, AGENTS.md §3, apply — a learn session looks like the persona re-reading their own profile) — and writes/extends:
@@ -15,15 +15,15 @@ entry point: AGENTS.md §4.1 links here for the full procedure
 - `data/csv/profiles.csv` (interaction-graph rows)
 - `data/csv/incidents.csv` (if an anomaly halts the session, AGENTS.md §6)
 
-`learn` is re-runnable to refresh any of the above. Re-running extends and corrects (per the correction rule, 01-spec.md §8.1/§9) — it never duplicates.
+`learn` is re-runnable to refresh any of the above. Re-running extends and corrects per the correction rule — it never duplicates.
 
-`learn` does **not** write historical observations into `data/csv/replies.csv`, `data/csv/tweets.csv`, or `data/csv/metrics.csv`. Those files belong to draft/send/review workflows unless a future spec change explicitly adds a raw learning-evidence table. In this procedure, historical evidence is distilled into the files listed above, with profile rows in `profiles.csv` and progress rows in `learn-progress.csv`.
+`learn` does **not** write historical observations into `data/csv/replies.csv`, `data/csv/tweets.csv`, or `data/csv/metrics.csv`. Those files belong to draft/send/review workflows unless a documented schema migration explicitly adds a raw learning-evidence table. In this procedure, historical evidence is distilled into the files listed above, with profile rows in `profiles.csv` and progress rows in `learn-progress.csv`.
 
 ---
 
 ## 0. Resume check
 
-`data/csv/learn-progress.csv` tracks progress per persona and section, because a full pass over "all current tweets and replies, as far back as X serves them" (00-requirements.md pillar 8) can exceed one `session_time_limit_minutes` window.
+`data/csv/learn-progress.csv` tracks progress per persona and section, because a full pass over all current tweets and replies, as far back as X serves them, can exceed one `session_time_limit_minutes` window.
 
 Use these section names:
 
@@ -113,8 +113,8 @@ From everything read in step 1 (replies, likes, follows visible on the profile),
 
 The interaction graph can become much larger than one session can handle. Prioritize accounts in this order:
 
-1. Direct reply authors and quote-post authors where Shubham added text.
-2. Accounts Shubham tagged directly.
+1. Direct reply authors and quote-post authors where the persona added text.
+2. Accounts the persona tagged directly.
 3. Repeatedly surfaced repost authors or accounts that shaped multiple learning rules.
 4. Accounts that have an obvious real-life or relationship signal (`Follows you`, `we-follow`, `mutual`, `real-life connection`).
 5. Incidental handles mentioned inside quoted tweets, link previews, or other people's text.
@@ -127,7 +127,7 @@ For each account not already in `data/csv/profiles.csv`:
 2. Score it against every axis in `guidelines/profile-rubric.md` (category, follower_tier, role_clout, audience_activity, geography, relevance, credibility, relationship).
 3. Write the row to `data/csv/profiles.csv`, with `engagement_outcomes` as a short free-text ledger built from step 1's classification of interactions with this account (e.g. "2 replies: 1 value-add got author-like, 1 quip no response").
 
-This is the network baseline that lets the engage/skip gate in `guidelines/profile-rubric.md` use real relationships instead of cold thresholds, per 01-spec.md §7 step 3.
+This is the network baseline that lets the engage/skip gate in `guidelines/profile-rubric.md` use real relationships instead of cold thresholds.
 
 Direct navigation to an exact profile URL is allowed for this step when it avoids excessive duplicate scrolling, but keep one focused tab, use reading dwell, and do not open parallel/background tabs.
 
@@ -143,7 +143,7 @@ Write `data/style/<persona>-twitter-style.md`:
 
 - **`## Confirmed`**: any voice pattern from step 1 observed **3 or more times**. Be specific — "uses lowercase for short observational tweets" not "casual tone."
 - **`## Tentative`**: patterns observed 1-2 times.
-- On re-run: a Tentative pattern that reaches 3 occurrences is promoted to Confirmed. A pattern contradicted by new evidence is rewritten in place per the correction rule (01-spec.md §8.1), with a line in `## Correction log`.
+- On re-run: a Tentative pattern that reaches 3 occurrences is promoted to Confirmed. A pattern contradicted by new evidence is rewritten in place per the correction rule, with a line in `## Correction log`.
 
 This is the file the cold-start guard (AGENTS.md §5.1) checks — `scroll`/`compose`/`send` cannot run until `## Confirmed` has at least one entry.
 
@@ -155,7 +155,7 @@ Also write `## Framing patterns (from Likes)` from step 1.5: name each technique
 
 - `guidelines/reply-playbook.md`: under each archetype's `**Examples**`, add 2-3 real examples found in step 1, replacing the `<!-- learn mode -->` placeholder.
 - `guidelines/profile-rubric.md`: under `## Seeded profile taxonomy`, note any recurring patterns across the interaction graph (e.g. relevance/credibility tendencies by category).
-- `data/learnings/content-playbook.md`: under `## Entries`, add seed entries for what performed (using the standard entry format, 01-spec.md §8.1, `Confidence: tentative` until `review` mode accumulates more evidence).
+- `data/learnings/content-playbook.md`: under `## Entries`, add seed entries for what performed, using `Confidence: tentative` until `review` mode accumulates more evidence.
 - `data/learnings/engagement-targets.md`: under `## Historical patterns (from learn mode)`, summarize the archetype/target-type/incentive classifications from step 1.
 
 Manual human audits of drafts before sending are also learning evidence. Fold them into the same homes immediately:
@@ -171,19 +171,19 @@ Metric handling in `learn`:
 
 - Visible counts on the persona's own historical posts feed `data/learnings/content-playbook.md`.
 - Visible audience activity on other accounts feeds `profiles.csv` (`audience_activity`) and `guidelines/profile-rubric.md`.
-- Do not append learn-mode captures to `metrics.csv`; that file remains for review-mode captures unless the spec is changed.
+- Do not append learn-mode captures to `metrics.csv`; that file remains for review-mode captures unless a documented schema migration changes that ownership.
 
 Evidence handling:
 
 - Markdown learning files should contain synthesized rules and representative examples, not raw dumps.
 - `profiles.csv` is the structured home for author/profile scoring.
 - `learn-progress.csv` is the structured home for scope, coverage, date gaps, and resume points.
-- If future learning needs per-item auditability beyond these homes, add it as an explicit spec change rather than overloading draft/review CSVs.
+- If future learning needs per-item auditability beyond these homes, add it as an explicit schema/template migration rather than overloading draft/review CSVs.
 
 ---
 
 ## Exit criteria
 
-Per 01-spec.md §11 Phase 2: the founder reads `data/style/<persona>-twitter-style.md` and confirms "this is how I write." If not, this is a signal to re-run `learn` (it will extend/correct) or to hand-edit the style doc directly — both are valid; the dashboard's Config surface (Phase 7) makes the latter possible without touching the raw file.
+The mode is successful when the founder/operator reads `data/style/<persona>-twitter-style.md` and confirms "this is how I write." If not, this is a signal to re-run `learn` (it will extend/correct) or to hand-edit the style doc directly — both are valid, and the dashboard Knowledge surface supports direct Markdown edits.
 
 

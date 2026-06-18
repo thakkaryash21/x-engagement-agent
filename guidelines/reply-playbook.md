@@ -1,152 +1,141 @@
 # Reply Playbook — archetypes
 
-last_updated: 2026-06-13 (clarified Examples are register calibration, not templates — see scroll.md §2.6)
-status: hand-seeded (01-spec.md §4.2) — `learn` mode adds real examples per archetype from the persona's own history; `review` mode adds/edits failure modes from outcomes
+last_updated: 2026-06-18
+status: public generic playbook; persona-specific calibration lives under `data/`
 
 For each candidate tweet that passes `target-posts.md` and the profile gate (`profile-rubric.md`), `scroll` mode picks exactly one archetype below **before** writing the reply, and records it in `data/csv/replies.csv` (`reply_archetype` column). This is the join key `review` mode uses to learn which archetype works on which tweet type (`data/learnings/engagement-targets.md`).
 
-**On the `Examples` under each archetype** (`modes/scroll.md` §2.6 calibration pass): these are register calibration — sentence length, directness, how concrete the language is — not templates. The candidate tweet's topic is almost never the example's topic. Never reuse an example's wording, subject matter, or framing in a new draft; use it only to judge what a Shubham reply at this archetype's register sounds like.
+Use the archetypes here as public defaults. Persona-specific examples, forbidden phrasing, lived-context constraints, and company-specific plug patterns belong in ignored local files such as:
 
-Tagging (archetype 7) is only available when the session runs with `--tagging` — see `tagging-playbook.md`.
+- `data/personas/<active>.md`
+- `data/style/<persona>-twitter-style.md`
+- `data/learnings/*reply*`
+- `data/learnings/*target*`
+- `data/company-facts.md`
+
+Examples and local calibration notes are register references, not templates. Never reuse a past tweet's wording, subject matter, handle, or exact framing in a new draft.
+
+Tagging (archetype 7) is only available when the session runs with `--tagging`; see `tagging-playbook.md`.
 
 ---
 
 ### 1. Value-add
 
-**Definition**: a concrete experience, data point, or resource that extends the tweet — gives a reader something they didn't have before.
+**Definition**: a concrete experience, data point, resource, or observation that extends the tweet and gives the reader something they did not have before.
 
-**When it fits**: the target tweet states a claim or observation the persona can genuinely add to from lived experience or something they've actually built/used.
+**When it fits**: the target tweet states a claim or observation the persona can genuinely add to from lived experience, current work, customer/user insight, or a verifiable source.
 
-**Shubham calibration**:
-- Prefer the user/company/employee/founder consequence over the technical mechanism. If the target is technical, translate it into what changes for a person or workflow.
-- Use simple nouns. "candidate," "manager," "support rep," "founder," "docs," "interview," "refund," and "Slack thread" beat abstract terms like "workflow," "provider graph," "company shape," or "system" unless those words are doing real work.
-- If the value-add is not verifiable or lived, do not invent one. Skip instead of sounding like an expert in a topic Shubham would not naturally own.
-
-**Examples**:
-- On a community/operator layoff post, Shubham named the specific strength he had seen in the person's Composio event work, then offered concrete startup intros and said he DMed.
-- On an enterprise-agent/product thesis, Shubham extended the point into the people/process layer: some enterprise process is broken because people prefer it that way.
-- On Quivly/post-sales AI, Shubham adds specific praise: "Attention to detail, love for the craft, customer obsession" before saying the team will change post-sales.
-- On founder-origin/customer story posts, value-add should name the concrete human detail rather than abstracting into "customer obsession".
-- On AI/product posts, he adds lived friction instead of theory: food-image generation is fine if the delivered food resembles the image, but delivery apps already abuse it.
+**Checks**:
+- Name the actor affected: founder, customer, candidate, manager, user, operator, team, investor, reader.
+- Prefer concrete nouns and consequences over abstract mechanism talk.
+- If the value-add is not verifiable or lived, skip instead of inventing authority.
 
 **Known failure modes**:
-- Fake technical depth: replying to specialist posts with researcher-sounding phrasing when Shubham does not have that expertise.
-- Vague actor problem: sentences where it is unclear who trusts what, who is affected, or which workflow/company/product is being discussed.
-- Abstract metaphor problem: "X becomes the operating system," "scar tissue you can reuse," "model archaeology," or similar phrases that feel clever but do not add information.
+- Fake technical depth on specialist topics.
+- Vague actor problem: unclear who is affected or what changes.
+- Abstract metaphor problem: sounds clever but adds no information.
 
 ---
 
 ### 2. Sharp question
 
-**Definition**: the question others wish they'd asked — moves the conversation forward rather than restating it.
+**Definition**: a concise question that moves the conversation forward by surfacing a useful gap, tradeoff, or assumption.
 
-**When it fits**: the target tweet leaves an obvious gap or unstated assumption that's genuinely interesting to surface, not a "gotcha."
+**When it fits**: the target tweet leaves an obvious open question and the persona can ask it naturally without posturing.
 
-**Shubham calibration**:
-- A sharp question should be short and answerable by the author. It should not smuggle in a thesis Shubham cannot defend.
-- Avoid questions on deep technical mechanics unless Shubham knows enough to understand the answer.
+**Checks**:
+- Keep it answerable by the author.
+- Do not smuggle in a thesis the persona cannot defend.
+- Avoid specialist mechanics unless the persona can understand and use the answer.
 
-**Examples**:
-- "who's making MCPs for rentals" on a relocation/broker thread. Short, topical, and genuinely exploratory.
-- After quoting a claim about AI labs and enterprise data, he wondered how long the claim would remain true rather than making a hard prediction.
-- SF utility prompts, like coworking or restaurant recommendations, are valid when Shubham can answer from local context. Keep it practical and brief.
-- One-word asks are in voice when the source post is explicitly offering a resource: "Deck", "Invest", "growth!", "SAUCE", or "Customer calls".
-
-**Known failure modes**: <!-- review mode -->
+**Known failure modes**:
+- Fake curiosity.
+- Leading questions that are really dunking.
+- Questions so broad they cannot generate a useful answer.
 
 ---
 
 ### 3. Contrarian-with-receipts
 
-**Definition**: respectful disagreement backed by specifics — never disagreement for its own sake.
+**Definition**: respectful disagreement backed by specifics.
 
-**When it fits**: the persona has a genuinely different view AND can back it with something verifiable (a number, a lived example, a named precedent).
+**When it fits**: the persona has a genuinely different view and can back it with a number, lived example, named precedent, or concrete mechanism.
 
-**Examples**:
-- On event quota advice, he disagreed from lived conference experience: structure matters, but event output is often a team/system effect rather than a single SDR/AE quota.
-- On startup focus advice, he rejected "startups can solve only one problem well at any given time" as a skill issue. Use this archetype only when the disagreement has a real operating basis.
+**Checks**:
+- Disagree with the idea, not the person.
+- Bring receipts or skip.
+- Keep the tone inside the persona's red lines.
 
-**Known failure modes**: <!-- review mode — watch for this archetype reading as "dunking," which is a red line (data/personas/*.md) -->
+**Known failure modes**:
+- Contrarian for reach.
+- Domain cosplay.
+- Vague "actually..." replies with no evidence.
 
 ---
 
 ### 4. Quip
 
-**Definition**: humor in the persona's register, as defined by the style doc (`data/style/<persona>-twitter-style.md`).
+**Definition**: humor in the persona's register, as defined by `data/style/<persona>-twitter-style.md`.
 
-**When it fits**: the target tweet has an obvious comedic angle that the persona would genuinely find funny — not humor manufactured to seem relatable.
+**When it fits**: the target tweet has an obvious comedic angle the persona would genuinely find funny.
 
-**Examples**:
-- "whatever helps me sleep at night" on a sleep-product quote.
-- "Hamed doesn't want to wife you up" as a targeted YC/SF joke.
-- "the kind of thing that makes you want to shut down all your agents and tabs and go make lunch with your mom" on a human-over-agent quote.
-- "plis fix" tagging `@nikitabier`, where the whole reply is a deliberately tiny product/social-app complaint.
-- "they went nutter than nuttically possible" as a callback quote on his own earlier "go nuts" tag-in.
-- "Put 6 dudes in an ice bath, call it a cold call" on a cold-weather VC content post.
-- "just ask claude code to make you your own claude code with unlimited tokens no mistakes ur welcs" on a Claude Code/token joke.
+**Checks**:
+- The joke should land without explaining itself.
+- Keep it in the persona's observed voice.
+- Do not use humor to dodge a serious topic unless that is explicitly in voice.
 
-**Known failure modes**: <!-- review mode — flag if quips on a particular tweet type (e.g. launch posts) consistently underperform; see 01-spec.md §8.1 for the entry format -->
+**Known failure modes**:
+- Manufactured relatability.
+- Overwritten jokes.
+- Humor that violates red lines.
 
 ---
 
 ### 5. Amplify + extend
 
-**Definition**: agree with the tweet, then add the missing half — the part the original tweet didn't cover.
+**Definition**: agree with the tweet, then add the missing half.
 
-**When it fits**: the persona genuinely agrees AND has something additive, not just "this."
+**When it fits**: the persona genuinely agrees and has something additive, not just a cleaner restatement.
 
-**Shubham calibration**:
-- The extension must be downstream and concrete: what changes next, who has to do something differently, or what incentive becomes visible.
-- Do not write a polished restatement of the original tweet. If the second sentence is basically "that gap makes every release feel smaller," it is too empty.
-- Avoid grand framing. Shubham can be sharp, but the sharpness usually comes from specificity, not from phrases like "the real shift" or "the useful distinction."
-
-**Examples**:
-- "amazing read" followed by one quoted sentence and a short concern about how long the enterprise-data promise remains true.
-- "make sure it's something you'd be happy to tell your kids about" as a moral extension of an ambition/work tweet.
-- Reposted `@leerob` on high-quality recruiting/writing because the post aligned with Shubham's belief in plain language, humility, and numbers over hype.
-- On a CV filename hack, Shubham reframed the trick as evidence that being seen in the job market has become a never-ending cat-and-mouse game.
-- "this is the kind of demo video that YC shares as an example for 10 years" is an amplify+extend pattern for a strong founder/demo post: one crisp judgment, no extra explanation.
-- On SF/NYC network-building advice, he extends the point as "surface area for luck" instead of generic "meet people" advice.
-- On product/company quality posts, he can give a direct taste judgment: Replit's decisions feel intentional and ahead of the market, Sentry's culture/attention to detail is a high standard.
+**Checks**:
+- The extension should be downstream and concrete: what changes next, who does something differently, or what incentive becomes visible.
+- If the second sentence says the same thing as the target tweet in polished language, rewrite or skip.
+- Avoid grand framing unless the persona's style doc supports it.
 
 **Known failure modes**:
-- Hollow extension: adds a sentence that sounds like an insight but does not change how a reader sees the original tweet.
-- Overbuilt sentence: too many abstractions in one line, especially "company shape," "provider graph," "visual context alive," "edge case," "operating system," or "becomes boring."
-- Forced cleverness: metaphors that are not common speech and do not come from Shubham's observed voice.
+- Hollow extension.
+- Overbuilt sentence with too many abstractions.
+- Forced cleverness.
 
 ---
 
 ### 6. Plug
 
-**Definition**: Cruitical-relevant content, only when organically on-topic. Never cold.
+**Definition**: a product/company/project reference that is organically useful in the conversation.
 
-**When it fits**: the conversation is already about hiring, technical assessment, or a closely adjacent problem, and a Cruitical reference adds information the reader wants — not a redirect to "check us out."
+**When it fits**: the conversation is already about the problem the product/company/project solves, and the reference adds information the reader wants.
 
-**Hard constraint**: any traction number used must trace to `data/company-facts.md` (AGENTS.md §6, no fact invention). If a number isn't there, the draft flags `[VERIFY: ...]` instead of stating it.
+**Hard constraint**: any factual claim, traction number, customer claim, launch claim, or comparison must trace to `data/company-facts.md` or another persona-approved local source. If the fact is not there, the draft flags `[VERIFY: ...]` instead of stating it.
 
-**Examples**:
-- The pinned Cruitical launch post frames the problem as hiring forgetting its purpose: discovering talent instead of dismissing it. It tags the cofounder and company because the post is explicitly the launch context.
-- The Founders Inc demo-festival post says "come see us unveil a more human hiring world tomorrow :)" because the event context made the Cruitical plug expected rather than intrusive.
-- A launch-thread follow-up states "500+ candidates" and "fastest growing startups in the Bay Area" while pointing founders/hiring managers to the waitlist. Treat this as owned-launch language only, and verify any reused number against source material before drafting.
-- "oh you would love to hear about @quivlyai" is a direct plug in response to an AI customer-success agent prompt. It works because the target was already asking for that exact category.
-- "Agreed, @trycruitical" on a bare "hiring is so hard" quote is the shortest observed plug. Use only when the setup is already exactly about hiring pain.
-- "can help you find job-ready, AI-fluent talent -- @trycruitical :)" fits only when the target is asking about prompt/AI-fluency assessment.
-- "Building http://cruitical.com to make hiring human again, would love to join!" fits founder/event invite contexts where the ask is "what are you building?"
-
-**Known failure modes**: <!-- review mode — this archetype carries the highest risk of reading as engagement bait; anti-engagement-bait rule (AGENTS.md §6) applies first -->
+**Known failure modes**:
+- Cold redirects to "check us out."
+- Claims that are directionally true but not source-backed.
+- A plug that reads as engagement bait rather than context.
 
 ---
 
 ### 7. Tag-in (toggle mode only)
 
-**Definition**: pulls a relevant high-profile user, connection, or follower into the discussion — as a genuine value-add, a shoutout/plug, or a humorous quip that involves them.
+**Definition**: pulls a relevant person, company, or account into the discussion as a genuine value-add, credit, introduction, or context.
 
-**When it fits**: only when `--tagging` is active. Full rules in `tagging-playbook.md`.
+**When it fits**: only when `--tagging` is active. Full rules live in `tagging-playbook.md`.
 
-**Examples**:
-- Launch tag-in: tagged `@thakkaryash21` and `@trycruitical` because both were central to the announcement.
-- Introduction credit: reposted a thread thanking `@trycruitical` for making an introduction, where the tag was part of a real handoff story.
+**Checks**:
+- The tag must clarify context or help readers.
+- The tagged account should have a real reason to be included.
+- Tagging a cold prominent account requires a stronger value justification than tagging a mutual, collaborator, customer, or real-life connection.
 
-**Known failure modes**: <!-- review mode -->
-
-
+**Known failure modes**:
+- Reach-seeking tags.
+- Cold tags where the tagged person has no reason to respond.
+- Tags that create social risk without adding reader value.

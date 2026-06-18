@@ -4,9 +4,9 @@ last_updated: 2026-06-18
 status: FastAPI + Vite React local web app
 
 A local web app for reviewing drafts, checking insights, editing Markdown knowledge files,
-tuning runtime config, and launching agent mode sessions. Per 01-spec.md §10, the dashboard
-is **not a second database**. It reads and writes the same CSVs, YAML, and Markdown files
-that `AGENTS.md` and the `modes/*.md` procedures use.
+tuning runtime config, and launching agent mode sessions. Per `docs/file-map.md`, the
+dashboard is **not a second database**. It reads and writes the same CSVs, YAML, and
+Markdown files that `AGENTS.md` and the `modes/*.md` procedures use.
 
 ## Run
 
@@ -47,8 +47,8 @@ Open http://127.0.0.1:5173. Vite proxies `/api` to FastAPI on port 8787.
   **Discard** sets `status=discarded`, prepends a `**Discarded**: user (dashboard), ...`
   note, and moves the file to `data/drafts/discarded/`. Either way, `send` mode
   (`modes/send.md` §2.1) still re-verifies the target and presents the item to the human
-  before anything is posted — the dashboard only records the review decision, per
-  01-spec.md §10.2. A lockout banner (from `data/csv/incidents.csv`) appears if
+  before anything is posted — the dashboard only records the review decision. A lockout
+  banner (from `data/csv/incidents.csv`) appears if
   `lockout_triggered=true` with no `acknowledged_at`, with a button to acknowledge it.
 - **Insights** — funnel counts (`drafted → approved/edited/discarded → sent → reviewed`)
   for replies and tweets, the overall edit rate on sent items, average

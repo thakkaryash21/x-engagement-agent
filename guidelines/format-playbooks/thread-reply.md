@@ -1,7 +1,7 @@
 # Format Playbook — Thread Reply
 
-last_updated: 2026-06-12
-status: hand-seeded (01-spec.md §4.5)
+last_updated: 2026-06-18
+status: hand-seeded
 
 A thread reply is a reply to a tweet that is itself part of a thread — the target tweet is one tweet in a longer argument, not a standalone post.
 
@@ -12,7 +12,7 @@ A thread reply is a reply to a tweet that is itself part of a thread — the tar
 ## Rules
 
 - The draft must engage with the thread's argument as a whole, not just the sentence directly above it.
-- Record which thread position was replied to in the draft file (per the template in 01-spec.md §6.1) — this is what lets `review` mode later check whether early vs. late thread-reply position correlates with outcomes.
+- Record which thread position was replied to in the draft file (per the draft template in `docs/file-map.md`) — this is what lets `review` mode later check whether early vs. late thread-reply position correlates with outcomes.
 - Otherwise, all `reply.md` rules apply — this is a reply, with one extra reading requirement.
 
 ## What breaks this format

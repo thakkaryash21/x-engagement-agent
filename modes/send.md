@@ -1,7 +1,7 @@
 # Mode: `send` — review, edit, post
 
-last_updated: 2026-06-12
-status: hand-authored procedure for 01-spec.md §6.3 / AGENTS.md §4.4
+last_updated: 2026-06-18
+status: hand-authored procedure for AGENTS.md §4.4
 entry point: AGENTS.md §4.4 links here for the full procedure
 
 `send` is the only mode with a code path that posts to X, and even here every post is preceded by an explicit human decision (AGENTS.md §1, principle 3). It walks `data/drafts/` oldest-first, re-verifies each target is still live, presents the draft, and acts on the human's send / edit / discard call. Browses and types via the same mimicry rules (§3) — typing on send is character-by-character (§3.3), never pasted.
@@ -32,7 +32,7 @@ List `data/drafts/*.md`, oldest-first by the `YYYYMMDD-HHMM` prefix of the filen
 
 The draft filename is `<id>.md` where `<id>` is a `reply_id` or `tweet_id`. Look up `<id>` in `data/csv/replies.csv` first; if not found, look it up in `data/csv/tweets.csv`. This tells you the item type (`reply` / `thread_reply` / `quote` vs `tweet`) and gives every other field (archetype, target, draft_text, etc.) for §2.4.
 
-If the row's `status` is already `approved` or `edited` (set by the dashboard, 01-spec.md §10.2), present it the same as any other draft — the dashboard records a human review decision, but every send still needs the in-session human gate (§1, principle 3). If `status=edited`, `draft_text` already reflects the dashboard's edit and `user_edited`/`edit_summary` are already set; note this for step 4 of §3 below.
+If the row's `status` is already `approved` or `edited` (set by the dashboard), present it the same as any other draft — the dashboard records a human review decision, but every send still needs the in-session human gate (§1, principle 3). If `status=edited`, `draft_text` already reflects the dashboard's edit and `user_edited`/`edit_summary` are already set; note this for step 4 of §3 below.
 
 ### 2.2 Existence check (replies/thread-replies/quotes only)
 
@@ -96,7 +96,7 @@ If `user_edited=true`, don't wait for `review` — the human just told you what 
 
 - If the edit reflects a phrasing/voice pattern not yet in the style doc, add it under `## Tentative`.
 - If a `## Tentative` pattern now has **3 occurrences** (this edit plus prior `learn`/`review`/send-mode entries describing the same pattern), promote it to `## Confirmed`, per the same promotion rule `learn` mode uses (`modes/learn.md` §4).
-- If the edit **contradicts** an existing `## Confirmed` or `## Tentative` rule, rewrite that rule in place per the correction rule (01-spec.md §8.1) and add a line to `## Correction log` — never leave the contradicted rule standing with the correction appended after it.
+- If the edit **contradicts** an existing `## Confirmed` or `## Tentative` rule, rewrite that rule in place per the correction rule in `docs/file-map.md` / `modes/review.md` and add a line to `## Correction log` — never leave the contradicted rule standing with the correction appended after it.
 
 This keeps the style doc as the single home for voice/phrasing learnings regardless of which mode surfaced them (`send`, `review`, or `learn`).
 
@@ -108,6 +108,6 @@ Continue the walk until `data/drafts/` is empty, or `sends_today >= max_sends_pe
 
 ## Exit criteria
 
-Per 01-spec.md §11 Phase 4: first real sends, with edits logged. Confirms the full draft → human-gated send → CSV/file bookkeeping loop end to end before `review` (Phase 5) has anything to act on.
+First real sends should prove the full draft → human-gated send → CSV/file bookkeeping loop end to end before `review` has anything to act on.
 
 

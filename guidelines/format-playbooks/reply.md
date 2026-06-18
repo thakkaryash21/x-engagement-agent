@@ -1,7 +1,7 @@
 # Format Playbook — Reply
 
-last_updated: 2026-06-12
-status: hand-seeded (01-spec.md §4.5)
+last_updated: 2026-06-18
+status: hand-seeded
 
 A reply joins an existing conversation. It is read by people scrolling that thread — primarily the original author and whoever else is already in the replies, not the persona's own followers (that's `quote.md`).
 

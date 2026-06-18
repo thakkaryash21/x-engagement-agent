@@ -1,129 +1,107 @@
-# CLAUDE.md — Twitter Engagement Agent (Development Context)
+# CLAUDE.md - X Engagement Agent Development Guide
 
 last_updated: 2026-06-18
-status: living document — keep in sync with AGENTS.md, 00-requirements.md, 01-spec.md as the system evolves
+file_map: [docs/file-map.md](docs/file-map.md)
+status: development/onboarding guide for changing this repository
 
-This file is for whoever (human or agent) does **development work on this Twitter agent** — adding modes, fixing wiring, extending the dashboard, refining playbooks. It is the onboarding doc: read this first to understand what exists, why, and how the pieces fit, then go to the specific file you need to change.
+This file is for humans and agents doing development work on this repo: adding modes, changing dashboard file IO, refining public playbooks, or updating documentation. Read this file, [AGENTS.md](AGENTS.md), and [docs/file-map.md](docs/file-map.md) before changing behavior.
 
-It is a different document from `AGENTS.md`: `AGENTS.md` is the **behavior contract an agent follows while *running* a mode** (`learn`/`scroll`/`compose`/`send`/`review`) — pacing, guards, file map, mode router. This file is the **map for *building and changing* that system**.
-
----
-
-## 1. What We're Building (one paragraph)
-
-A Codex-primary, Claude-Code-interchangeable agent that drives the founders' **real, logged-in Chrome** to browse Twitter/X as a specific persona (Shubham first, Yash second). It decides what's worth replying to, drafts replies/quotes/thread-replies/original tweets in that persona's authentic voice, queues every draft for human review, and — after a human sends — circles back days later to capture analytics and turn outcomes into written rules. The "database" is local CSVs; the "brain" is a set of Markdown guideline files the agent itself keeps rewriting as it learns. A local dashboard is the primary day-to-day UI; raw files remain inspectable and editable for maintenance.
-
-This lives inside this **standalone local workspace** — a self-contained repository, not part of the numbered `0X-*` Markdown KB structure described in the source KB.
+`AGENTS.md` is the runtime behavior contract an agent follows while running a mode. This file explains how to maintain the system.
 
 ---
 
-## 2. Objective — the non-negotiables
+## 1. What This Repo Is
 
-From `00-requirements.md`'s ten capability pillars, distilled to what actually constrains design decisions:
+This is a local, file-backed X/Twitter engagement agent for founder-led marketing. It uses the operator's browser session to learn a persona, find relevant conversations, draft replies and original posts, queue drafts for human review, and capture post-send learnings.
 
-1. **The browser is the only integration.** No X API, no scrapers. Everything the agent "knows" about Twitter comes from looking at rendered pages, like a human.
-2. **Files are the whole system.** CSVs under `data/csv/` = database. Markdown under `guidelines/`, `data/style/`, `data/learnings/`, and `data/writing/` = intelligence. `data/drafts/` = human review queue. The dashboard is a view/edit layer over these same files — never a second database.
-3. **The agent never sends.** It drafts. A human gates every send. No code path posts without a preceding human action.
-4. **Full human mimicry is mandatory** (not just randomized delays): burst-pause scrolling, character-by-character typing, one focused tab, human-paced navigation. This is a ToS-risk mitigation, treated as a hard requirement everywhere.
-5. **Zero AI-tells.** Every draft passes the Anti-AI Bible (`data/writing/00_anti_ai_writing_bible.md`) as a hard gate — full rewrite on any tell, never a patch.
-6. **Voice and red lines outrank metrics**, always. A high-performing pattern that violates either is logged as an observation, never promoted to a rule.
-7. **One fact, one home; append vs. correct.** Learnings are appended as new evidence arrives; a rule contradicted by new evidence is rewritten in place (the "correction rule," 01-spec.md §8.1/§9), never left to rot alongside its replacement.
-8. **No fact invention.** Any Cruitical traction number in a draft must trace to `data/company-facts.md` (the main KB) or it's flagged `[VERIFY: ...]`.
-
-Full pillar-by-pillar detail: `00-requirements.md`. Technical spec (directory layout origins, CSV schemas, dashboard spec): `01-spec.md`.
+The public repo should be reusable. Real personas, real company facts, real drafts, metrics, profiles, local examples, and private writing guides live under ignored `data/`. Public files define the reusable operating system and sanitized starter templates.
 
 ---
 
-## 3. How We're Going About It — the operating model
+## 2. Non-Negotiables
 
-### 3.1 Five modes, one router
+1. **Browser-only integration.** No X API or scraper dependency. Browser-touching modes interact with rendered pages like a human.
+2. **Files are the system.** CSV, Markdown, YAML, and draft files are the database. The dashboard is an editor/view over those files, not a second store.
+3. **Human-gated sending.** The agent drafts and queues. A human explicitly approves every post in `send` mode.
+4. **Private data stays local.** Persona-specific examples, real handles, company facts, style learnings, metrics, and drafts belong in ignored `data/`.
+5. **Markdown structure matters.** Markdown files are database state too. Preserve headings, metadata, and draft separators unless a documented migration updates all readers and writers.
+6. **One fact, one home.** Do not duplicate the same rule across persona files, style docs, public playbooks, and learnings. Pick the owning file and reference it.
+7. **No fact invention.** Company/product/persona claims in drafts must trace to `data/company-facts.md` or another persona-approved local source. Unknowns are marked `[VERIFY: ...]`.
 
-`AGENTS.md` §4 is the mode router. Every session starts with the **Session Bootstrap** (§4.0: load persona config, limits/metrics config, check incident lockout, run Cold-Start Guard, attach to Chrome), then proceeds to one of:
+---
 
-| Mode | Procedure | What it does |
+## 3. File Ownership
+
+Use [docs/file-map.md](docs/file-map.md) as the canonical routing guide. It defines what belongs in:
+
+- public runtime files (`AGENTS.md`, `modes/*.md`, `guidelines/*.md`)
+- committed config (`config/*.yaml`)
+- ignored runtime data (`data/**`)
+- CSV database files (`data/csv/*.csv`)
+- draft Markdown templates (`data/drafts/*.md`)
+- public examples (`example/data/**`)
+- dashboard file IO (`dashboard/file_store.py`)
+
+If ownership changes, update `docs/file-map.md` in the same change.
+
+---
+
+## 4. Operating Model
+
+`AGENTS.md` routes five modes:
+
+| Mode | Procedure | Purpose |
 |---|---|---|
-| `learn` | `modes/learn.md` | Read-only cold start: studies the persona's Posts, Replies, **Likes** (framing/genre patterns), and interaction network. Outputs the style doc + seed playbooks. Re-runnable; extends/corrects, never duplicates. |
-| `scroll` | `modes/scroll.md` | Browses the timeline, filters/scores candidates, drafts replies/thread-replies/quotes into the queue. `--tagging` enables tag-in exploration. |
-| `compose` | `modes/compose.md` | Drafts original tweets. Same drafting pipeline as `scroll`, no target browsing. |
-| `send` | `modes/send.md` | Walks the draft queue oldest-first; existence/staleness check, human decides send/edit/discard. Edits feed back into the style doc immediately. |
-| `review` | `modes/review.md` | ≥5 days after send: captures layered metrics, joins to draft metadata, writes learning entries (content/timing/engagement-target playbooks), promotes high-confidence voice rules to the style doc. |
+| `learn` | `modes/learn.md` | Study the active persona and write style/profile learning state. |
+| `scroll` | `modes/scroll.md` | Browse X, select candidates, and queue replies, thread replies, or quotes. |
+| `compose` | `modes/compose.md` | Queue original posts from persona territory and learned content patterns. |
+| `send` | `modes/send.md` | Present queued drafts to the human, post only after approval, and capture edits. |
+| `review` | `modes/review.md` | Capture delayed performance metrics and update learnings. |
 
-### 3.2 Browser control
-
-The agent attaches to the user's already-open Chrome via Codex's `control-chrome` plugin (AGENTS.md §3.1) — no separate automation browser. Per-persona `chrome_profile` (`data/personas/<name>.md`) tells the user which Chrome profile to have open.
-
-### 3.3 The drafting pipeline — the actual "writing" step
-
-This is the part most likely to need tuning, and the part most recently reworked. `modes/scroll.md` §2.6 / `modes/compose.md` §2, in order:
-
-1. **Calibration pass** — re-read 2-3 real examples for the chosen archetype (`guidelines/reply-playbook.md`, for `scroll`) or the matching "Key traits from actual tweets" in the voice guide's Twitter/X section (for `compose`). Sets the target **register** (sentence length, directness, how much is stated vs. implied) — never topic or wording.
-2. **Persona voice guide** (`data/personas/<name>.md` → `voice_guide`) — vocabulary, tone, territory framing, red lines.
-3. **Personal style doc** (`data/style/<persona>-twitter-style.md`) — `## Confirmed` rules are hard constraints, `## Tentative` weighted lightly.
-4. **Framing/engagement pass** — checks the draft against `data/style/<persona>-twitter-style.md` → `## Framing patterns (from Likes)`. If the draft reads flat/report-like, rewrites the **framing** (not the idea) using a noted technique (lead with a concrete detail, set up a contrast, close on dry understatement, etc.). Weighted below pass 3 — never overrides Confirmed voice or red lines.
-5. **Anti-AI Bible final pass** (hard gate) — any tell found, including ones introduced by pass 4, means rewrite from scratch.
-
-Plus five Shubham-specific checks before recording (read-aloud, actor, contribution, forbidden-phrasing, expertise — see `modes/scroll.md` §2.6).
-
-**The calibration-not-copy principle applies everywhere examples are used**: `reply-playbook.md` examples, voice-guide tweet examples, and `## Framing patterns (from Likes)` are all *register/technique* references. Drafts should never inherit a past tweet's topic, wording, or specific framing — only its *shape*.
-
-### 3.4 Learning loop
-
-`learn` is the cold start (Posts/Replies → voice patterns; Likes → framing/engagement patterns, §1.5; interaction graph → `profiles.csv`). `review` is the ongoing loop (≥5 days post-send → metrics → learning entries → promotion to style doc when confidence is `high` (≥7 consistent observations)). Both write through the same correction rule: contradicted entries get rewritten in place with a line in `## Correction log`, never appended-around.
-
-### 3.5 Dashboard
-
-`dashboard/server.py` runs a FastAPI backend at http://127.0.0.1:8787 and serves the built Vite React app from `dashboard/frontend/dist`. During frontend development, run the backend plus `npm run dev` and use http://127.0.0.1:5173; Vite proxies `/api` to FastAPI.
-
-The dashboard is a view/edit layer over the same files the modes use: draft review decisions update `data/drafts/` plus the CSV rows, Settings updates `config/*.yaml` and active persona state, Knowledge edits Markdown under `data/personas/`, `guidelines/`, `data/style/`, `data/writing/`, and `data/learnings/`, and Run launches a new local PowerShell/Codex session. See `dashboard/README.md`.
+Every mode starts from the session bootstrap in `AGENTS.md` and then follows its mode file. Keep summaries in `AGENTS.md` aligned with mode procedures.
 
 ---
 
-## 4. File/Directory Structure
+## 5. Dashboard Model
 
-```
-.
-  00-requirements.md        Requirements and product intent
-  01-spec.md                Technical spec and data model
-  AGENTS.md                 Runtime behavior contract and mode router
-  CLAUDE.md                 Development/onboarding guide
-  README.md                 Public project overview
-  config/
-    app.yaml                Non-sensitive app wiring: data_root, agent command, dashboard port
-  data/                     PRIVATE, gitignored runtime state
-    personas/               Real persona definitions
-    company-facts.md        Verified company/product facts for factual claims
-    config/                 Runtime limits and metrics settings
-    data/                   CSV database
-    drafts/                 Human review queue and archives
-    learnings/              Review-mode learnings
-    style/                  Learned persona style docs
-    writing/                Private writing and voice guides
-  example/data/             Public starter templates and schema-only CSVs
-  guidelines/               Public targeting, profile, format, and tagging playbooks
-  modes/                    Mode procedures: learn, scroll, compose, send, review
-  dashboard/                Local FastAPI backend + Vite React dashboard
-  docs/                     Public docs and implementation notes
-  scripts/                  Bootstrap and publish-safety helpers
+The dashboard is a local FastAPI backend plus Vite React frontend:
+
+- Backend entry: `dashboard/server.py`
+- File IO layer: `dashboard/file_store.py`
+- Frontend source: `src/`
+- Built frontend: `dashboard/frontend/dist/`
+
+The dashboard edits the same files the modes read:
+
+- drafts under `data/drafts/`
+- CSV rows under `data/csv/`
+- Markdown knowledge files under `data/personas/`, `data/style/`, `data/learnings/`, `data/writing/`, and `guidelines/`
+- runtime config under `config/`
+
+Do not add a parallel persistence layer unless the repo design is intentionally changed and documented.
+
+---
+
+## 6. Extension Rules
+
+- Keep public playbooks persona-neutral. Move persona-specific calibration to `data/personas/`, `data/style/`, or `data/learnings/`.
+- Keep `config/` non-sensitive. Runtime defaults go there; private company/persona facts do not.
+- Keep `example/data/` sanitized and structurally aligned with `data/`.
+- Preserve CSV headers unless every mode, dashboard reader/writer, example CSV, and `docs/file-map.md` are updated together.
+- Preserve draft `---` separators unless the dashboard parser and mode docs are migrated together.
+- When a learning contradicts an existing rule, rewrite the owning rule in place and record the correction. Do not leave stale and corrected rules competing.
+- Update `last_updated:` when materially changing Markdown files that have that field.
+
+---
+
+## 7. Verification Before Publishing
+
+Before publishing or committing cleanup work, run the publish-safety checks:
+
+```powershell
+.\scripts\check-sensitive-data.ps1
+git ls-files data/* docs/superpowers/*
+git status --short --ignored
 ```
 
----
-
-## 5. Current State (snapshot — verify against the files before relying on this)
-
-- **Shubham persona** is the only one that's been through `learn`: style doc has 15 `## Confirmed` + 11 `## Tentative` voice patterns from Posts/Replies; `## Framing patterns (from Likes)` exists as an empty section pending a Likes pass; `reply-playbook.md` has real examples seeded for most archetypes; `profiles.csv` has ~44 studied accounts.
-- **Cold-Start Guard** (AGENTS.md §5.1) is satisfied for Shubham (style doc has ≥1 Confirmed entry). Not yet run for Yash.
-- **Dashboard** is built and functional: Drafts, Insights, Knowledge, Settings, and Run tabs are wired to the files above.
-- **Private runtime data is intentionally omitted from git.** Use local `data/` for real personas, drafts, metrics, profiles, and writing guides; use `example/data/` for publishable templates only.
----
-
-## 6. Conventions When Extending This System
-
-- **One fact, one home.** Don't duplicate a rule across `voice_guide`, `style_doc`, `reply-playbook.md`, and `data/learnings/*` — each has a distinct job (see §3.3/§3.4). If you're adding a new kind of learned signal, decide which single file owns it before writing to multiple.
-- **Examples are calibration, never templates.** Any time you add an "Examples" section that future drafting passes will read, state explicitly that it calibrates register/technique, not topic/wording — the existing sections (`reply-playbook.md`, style doc's Framing-from-Likes) model this.
-- **Correction rule over append.** When a rule turns out wrong, rewrite it in place and log it in `## Correction log` — don't leave the old and new versions both present.
-- **Update `last_updated`** on any file you materially change, with a short note on what changed (see recent edits to `scroll.md`/`compose.md`/`learn.md` for the pattern).
-- **Keep `AGENTS.md` and this file in sync with the mode files.** If you change a drafting pass, update the one-line pipeline summaries in `AGENTS.md` §4.2/§4.3 and the pipeline description in §3.3 above.
-- **Voice/red-lines/no-fact-invention are non-negotiable** — any new mode, dashboard feature, or playbook change must preserve these even if it seems to hurt "engagement."
-
-
-
+Expected result: no tracked private data, local-only folders remain ignored, and no private/source-specific references appear in public files.

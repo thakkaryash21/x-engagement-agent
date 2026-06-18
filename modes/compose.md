@@ -1,7 +1,7 @@
 # Mode: `compose` — original tweets
 
-last_updated: 2026-06-13 (added §2 calibration pass against voice guide's Twitter/X examples)
-status: hand-authored procedure for 01-spec.md §4.5 / AGENTS.md §4.3
+last_updated: 2026-06-18
+status: hand-authored procedure for AGENTS.md §4.3
 entry point: AGENTS.md §4.3 links here for the full procedure
 
 `compose` drafts original tweets — posts to the persona's own timeline, not replies. It never sends (AGENTS.md §1, principle 3) and does not take `--tagging` (that toggle is `scroll`-only, per `guidelines/tagging-playbook.md`). Browsing is for context only (the persona's own recent timeline, read to avoid repeating a point already made and to ground "what's actually happening" for build-update tweets) — mimicry rules (§3) still apply to any browsing done.
@@ -29,7 +29,7 @@ Pick exactly one `content_type` (build-update, take, question, thread, quip) and
 
 ## 2. Draft (Anti-AI gate)
 
-**Calibration pass (before writing)**: re-read the "Key traits from actual tweets" examples in the voice guide's Twitter/X section (`voice_guide` path) that match the chosen `content_type` (observational wit, product criticism with specificity, dry industry commentary, etc.). These calibrate **register** — sentence length, directness, lowercase-casual vs. complete-sentence framing, how much is stated vs. implied — not content. Do not reuse a past tweet's topic, wording, or specific framing; the goal is matching the *shape* of a Shubham tweet for this `content_type`, not recycling one. Once `data/learnings/content-playbook.md` has `## What's working` entries, treat those the same way — as rules about what kind of content lands, never as text to lift.
+**Calibration pass (before writing)**: re-read the "Key traits from actual tweets" examples in the voice guide's Twitter/X section (`voice_guide` path) that match the chosen `content_type` (observational wit, product criticism with specificity, dry industry commentary, etc.). These calibrate **register** — sentence length, directness, casing, complete-sentence framing, how much is stated vs. implied — not content. Do not reuse a past tweet's topic, wording, or specific framing; the goal is matching the *shape* of this persona's tweet for this `content_type`, not recycling one. Once `data/learnings/content-playbook.md` has `## What's working` entries, treat those the same way — as rules about what kind of content lands, never as text to lift.
 
 Same pipeline as `modes/scroll.md` §2.6: persona voice guide → personal style doc (`## Confirmed` hard, `## Tentative` light) → framing/engagement pass (`data/style/<persona>-twitter-style.md` → `## Framing patterns (from Likes)`, weighted below the style doc — if the draft reads flat or report-like, rewrite its framing, not its idea) → Anti-AI Bible final pass (hard gate — any tell found, including ones introduced by the framing pass, means rewrite from scratch, not patch).
 
@@ -70,7 +70,7 @@ Alt (different angle, optional):
 <one alternate — non-thread drafts only>
 ```
 
-This is the spec §6.1 template with the Target/Author/Tweet/Archetype/Tagging lines omitted (no target tweet exists for an original tweet, per `guidelines/format-playbooks/original-tweet.md`).
+This is the standard draft template with the Target/Author/Tweet/Archetype/Tagging lines omitted (no target tweet exists for an original tweet, per `guidelines/format-playbooks/original-tweet.md`).
 
 ## 4. Session stop conditions
 
@@ -80,6 +80,6 @@ Same as `modes/scroll.md` §4: stop when `len(tweets.csv rows with drafted_at in
 
 ## Exit criteria
 
-Per 01-spec.md §11 Phase 6: `--tagging` (already wired in `modes/scroll.md` §2.4/§2.5 and `guidelines/tagging-playbook.md`) and `compose` are used in anger for a week without incident. An "incident" here means anything logged to `data/csv/incidents.csv` (AGENTS.md §6) — not a draft the founder simply discards, which is normal queue hygiene.
+`compose` is working when original-post drafts can be used for a week without incidents. An "incident" here means anything logged to `data/csv/incidents.csv` (AGENTS.md §6) — not a draft the founder simply discards, which is normal queue hygiene.
 
 

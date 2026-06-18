@@ -1,12 +1,19 @@
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $patterns = @(
-    "D:\\cruitical-kb",
     "claude-code-workflows/twitter-agent",
     "\.claude/writing",
     "03-traction/metrics.md",
     "localhost:9222"
 )
+
+if ($env:SOURCE_KB_PATH) {
+    $patterns += [regex]::Escape($env:SOURCE_KB_PATH)
+}
+
+if ($env:EXTRA_SENSITIVE_PATTERNS) {
+    $patterns += ($env:EXTRA_SENSITIVE_PATTERNS -split ";" | Where-Object { $_.Trim() })
+}
 
 $failed = $false
 foreach ($pattern in $patterns) {

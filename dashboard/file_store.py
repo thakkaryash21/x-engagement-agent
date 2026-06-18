@@ -177,10 +177,14 @@ class DashboardStore:
 
     def active_persona(self) -> dict[str, str | None]:
         text = (self.root / "AGENTS.md").read_text(encoding="utf-8")
-        persona = re.search(r"^persona:\s*(\w+)", text, re.M)
+        persona = re.search(r"^persona:\s*([\w-]+)", text, re.M)
         tagging = re.search(r"^tagging:\s*(on|off)", text, re.M)
+        active = persona.group(1) if persona else None
+        available = self.list_personas()
+        if active not in available and available:
+            active = available[0]
         return {
-            "persona": persona.group(1) if persona else None,
+            "persona": active,
             "tagging": tagging.group(1) if tagging else None,
         }
 
@@ -190,7 +194,7 @@ class DashboardStore:
         if persona is not None:
             if persona not in self.list_personas():
                 raise ValueError("unknown persona")
-            text = re.sub(r"^(persona:\s*)\w+", rf"\g<1>{persona}", text, count=1, flags=re.M)
+            text = re.sub(r"^(persona:\s*)[\w-]+", rf"\g<1>{persona}", text, count=1, flags=re.M)
         if tagging is not None:
             if tagging not in ("on", "off"):
                 raise ValueError("tagging must be 'on' or 'off'")

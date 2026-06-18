@@ -38,9 +38,9 @@ Vite serves the React dashboard at http://127.0.0.1:5173 and proxies `/api` to t
 
 - [AGENTS.md](AGENTS.md): runtime behavior contract for `learn`, `scroll`, `compose`, `send`, and `review`.
 - [dashboard/README.md](dashboard/README.md): dashboard surfaces, editable files, and current limitations.
+- [docs/file-map.md](docs/file-map.md): what belongs in each public, config, private data, and example file.
 - [docs/data-boundary.md](docs/data-boundary.md): what stays private in `data/` vs. what is safe to publish.
 - [docs/operator-guide.md](docs/operator-guide.md): day-to-day operating checklist.
-- [01-spec.md](01-spec.md): technical spec and data model.
 
 ## Modes
 

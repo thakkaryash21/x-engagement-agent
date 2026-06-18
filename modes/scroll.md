@@ -1,7 +1,7 @@
 # Mode: `scroll` — browse, select, draft
 
-last_updated: 2026-06-13 (added §2.6 calibration pass against reply-playbook examples)
-status: hand-authored procedure for 01-spec.md §6.1 / AGENTS.md §4.2
+last_updated: 2026-06-18 (generalized draft gates and moved persona-specific calibration to data/)
+status: hand-authored procedure for AGENTS.md §4.2
 entry point: AGENTS.md §4.2 links here for the full procedure
 
 `scroll` browses the persona's timeline, selects tweets worth engaging with, and drafts replies/thread-replies/quotes into the review queue. It never sends (AGENTS.md §1, principle 3). Browses via the same mimicry rules (§3) — a scroll session looks like the persona reading their feed and occasionally stopping to reply. Pass `--tagging` to additionally explore tag-in candidates per `guidelines/tagging-playbook.md`.
@@ -64,7 +64,7 @@ Look up the author's handle in `data/csv/profiles.csv`.
 
 Apply the engage decision: `relevance >= 3 AND credibility >= 3 AND (audience_activity >= 3 OR relationship != none)`. If it fails, the profile row is still saved (studying ≠ engaging) — skip to the next candidate.
 
-### 2.4 Format decision (01-spec.md §4.5)
+### 2.4 Format decision
 
 - If the target tweet is part of a longer thread (has parent tweets, or is itself a reply with visible ancestors), the format is **thread_reply**: expand and read the full thread first — all parents back to the root, and at least the first 20 tweets if the thread is long (`guidelines/format-playbooks/thread-reply.md`, hard rule). Note the thread position replied to.
 - Otherwise, decide between **reply** and **quote** using `guidelines/format-playbooks/reply.md` and `quote.md`: quote only if the persona has a take bigger than the thread that should reach their own followers and stands alone without the quoted tweet; otherwise reply.
@@ -72,18 +72,18 @@ Apply the engage decision: `relevance >= 3 AND credibility >= 3 AND (audience_ac
 
 ### 2.5 Archetype decision (`guidelines/reply-playbook.md`)
 
-Pick exactly one archetype (value-add, sharp question, contrarian-with-receipts, quip, amplify+extend, plug, or tag-in if `--tagging` and 2.4 selected it) **before** writing, informed by the chosen format playbook. The Plug archetype's hard constraint applies: any Cruitical traction number must trace to `data/company-facts.md`, otherwise the draft uses `[VERIFY: ...]`.
+Pick exactly one archetype (value-add, sharp question, contrarian-with-receipts, quip, amplify+extend, plug, or tag-in if `--tagging` and 2.4 selected it) **before** writing, informed by the chosen format playbook. The Plug archetype's hard constraint applies: any company/product claim must trace to `data/company-facts.md` or another persona-approved local source, otherwise the draft uses `[VERIFY: ...]`.
 
 Before moving to drafting, do an explicit angle check:
 
 1. Name two possible reply angles in scratch thinking: one practical/user angle and one social/company/product angle.
-2. Reject angles that require Shubham to pretend to be a domain expert, especially in deep technical research, model-training methodology, hardware, government/export-policy analysis, or finance.
+2. Reject angles that require the persona to pretend to be a domain expert, especially in specialist technical research, model-training methodology, hardware, government/export-policy analysis, finance, or any topic outside the persona's documented territory.
 3. Pick the angle only if it has a concrete actor and consequence, such as "hiring managers will trust the wrong signal," "support reps need permission boundaries," "a founder can test demand faster," or "docs become part of agent onboarding."
 4. If both angles are abstract, skip the tweet.
 
 ### 2.6 Draft (Anti-AI gate)
 
-**Calibration pass (before writing)**: re-read the 2-3 real examples listed under the archetype chosen in 2.5 (`guidelines/reply-playbook.md`). These calibrate **register**, not content — sentence length, how direct vs. understated the point lands, how much setup (if any) precedes it, and the gap between what's said and what's implied. The example's topic is almost never the candidate tweet's topic. Do not borrow its wording, structure, subject matter, or specific framing — that produces an off-topic or recycled-sounding reply. The question is "what does a Shubham reply at this register sound like," never "what did Shubham say last time."
+**Calibration pass (before writing)**: re-read the public archetype notes in `guidelines/reply-playbook.md`, then any local persona-specific calibration under `data/style/` and `data/learnings/`. These calibrate **register**, not content — sentence length, how direct vs. understated the point lands, how much setup (if any) precedes it, and the gap between what's said and what's implied. The example's topic is almost never the candidate tweet's topic. Do not borrow its wording, structure, subject matter, handle, or specific framing. The question is "what does this persona sound like at this register," never "what did this persona say last time."
 
 Write the draft in this order — each pass operates on the output of the previous one:
 
@@ -96,13 +96,13 @@ The calibration pass and the four numbered passes are not independent rewrites �
 
 If a genuinely different second angle exists, draft one **Alt** using the same pipeline. Alts are optional — don't manufacture a weak one just to fill the template.
 
-Run these additional Shubham-specific checks before recording:
+Run these draft-quality checks before recording:
 
-- **Read-aloud check**: would Shubham plausibly say this sentence to another founder without needing to explain what the nouns mean? If not, rewrite.
+- **Read-aloud check**: would the persona plausibly say this sentence to the intended audience without needing to explain what the nouns mean? If not, rewrite.
 - **Actor check**: every abstract noun should resolve to a person, team, product, or decision. If the draft says "workflow," "provider," "company," "system," "edge case," or "model" without a clear referent, rewrite.
 - **Contribution check**: the reply must add a concrete observation, joke, question, or relationship-building note. A cleaned-up paraphrase of the original tweet is still a fail.
 - **Forbidden phrasing check**: reject drafts containing "gets weird," "key phrase," "the real shift," "the interesting part is less," "operating system" as a metaphor, "model archaeology," "scar tissue," "frontier-lab shaped," or "becomes boring."
-- **Expertise check**: if the draft sounds like a researcher/operator in a domain Shubham has not shown expertise in, skip the tweet instead of rewriting.
+- **Expertise check**: if the draft sounds like an expert in a domain the persona has not shown expertise in, skip the tweet instead of rewriting.
 
 ### 2.7 Record and queue
 
@@ -166,6 +166,6 @@ Whichever comes first ends the session. Stopping mid-loop is normal — there is
 
 ## Exit criteria
 
-Per 01-spec.md §11 Phase 3: a 10-draft session where the founder would send ≥5 drafts unedited. If fewer than half the drafts are send-ready, the fix is to the style doc and playbooks (re-run `learn`, or hand-edit `data/style/<persona>-twitter-style.md` and the guideline files) — not to this procedure.
+A healthy scroll session produces drafts where the founder/operator would send at least half unedited. If fewer than half the drafts are send-ready, the fix is to the style doc and playbooks (re-run `learn`, or hand-edit `data/style/<persona>-twitter-style.md` and local learning files) — not to this procedure.
 
 
