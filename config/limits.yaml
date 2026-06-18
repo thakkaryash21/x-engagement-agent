@@ -12,4 +12,3 @@ max_seconds_between_actions: 8
 min_minutes_between_sends: 10
 min_hours_between_same_author: 24 # duplicate-engagement guard (AGENTS.md §5.2)
 draft_staleness_hours: 12 # stale-draft flag threshold (AGENTS.md §5.3)
-

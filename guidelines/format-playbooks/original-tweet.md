@@ -9,7 +9,7 @@ An original tweet (drafted in `compose` mode) has no target tweet — it's poste
 
 - Must stand alone — by definition there's no surrounding context to lean on.
 - Length and structure follow the voice guide's Twitter/X section for the chosen `content_type` (`compose-playbook.md`): most observations/takes/quips are 1-3 sentences; threads only when the thought genuinely needs more than one tweet.
-- `content_type` and `hook_type` are chosen explicitly before writing (per `compose-playbook.md`) and recorded in `data/data/tweets.csv` — this is the join key `review` mode uses for `data/learnings/content-playbook.md` and `data/learnings/timing-playbook.md`.
+- `content_type` and `hook_type` are chosen explicitly before writing (per `compose-playbook.md`) and recorded in `data/csv/tweets.csv` — this is the join key `review` mode uses for `data/learnings/content-playbook.md` and `data/learnings/timing-playbook.md`.
 
 ## What breaks this format
 

@@ -7,8 +7,8 @@ entry point: AGENTS.md §4.4 links here for the full procedure
 `send` is the only mode with a code path that posts to X, and even here every post is preceded by an explicit human decision (AGENTS.md §1, principle 3). It walks `data/drafts/` oldest-first, re-verifies each target is still live, presents the draft, and acts on the human's send / edit / discard call. Browses and types via the same mimicry rules (§3) — typing on send is character-by-character (§3.3), never pasted.
 
 Writes to:
-- `data/data/replies.csv` / `data/data/tweets.csv` (fills in send-time columns on the matching row)
-- `data/data/incidents.csv` (if an anomaly halts the session, AGENTS.md §6)
+- `data/csv/replies.csv` / `data/csv/tweets.csv` (fills in send-time columns on the matching row)
+- `data/csv/incidents.csv` (if an anomaly halts the session, AGENTS.md §6)
 - `data/style/<persona>-twitter-style.md` (immediate edit-pattern capture, §4 below)
 - `data/drafts/sent/` / `data/drafts/discarded/` (moves the draft file)
 
@@ -18,9 +18,9 @@ Writes to:
 
 Session Bootstrap (AGENTS.md §4.0) has already run, including the Cold-Start Guard — `send` loads drafts that were produced under that guard, so it runs too.
 
-From `data/config/limits.yaml`: `max_sends_per_day`, `min_minutes_between_sends`.
+From `config/limits.yaml`: `max_sends_per_day`, `min_minutes_between_sends`.
 
-Before starting the walk, count today's sends: scan `data/data/replies.csv` and `data/data/tweets.csv` for rows with `sent_at` on today's date. This is `sends_today` — the running count against `max_sends_per_day`. Also note the most recent `sent_at` across both CSVs (if any, today) — this is the clock for `min_minutes_between_sends`.
+Before starting the walk, count today's sends: scan `data/csv/replies.csv` and `data/csv/tweets.csv` for rows with `sent_at` on today's date. This is `sends_today` — the running count against `max_sends_per_day`. Also note the most recent `sent_at` across both CSVs (if any, today) — this is the clock for `min_minutes_between_sends`.
 
 ## 1. Walk the queue
 
@@ -30,7 +30,7 @@ List `data/drafts/*.md`, oldest-first by the `YYYYMMDD-HHMM` prefix of the filen
 
 ### 2.1 Identify the row
 
-The draft filename is `<id>.md` where `<id>` is a `reply_id` or `tweet_id`. Look up `<id>` in `data/data/replies.csv` first; if not found, look it up in `data/data/tweets.csv`. This tells you the item type (`reply` / `thread_reply` / `quote` vs `tweet`) and gives every other field (archetype, target, draft_text, etc.) for §2.4.
+The draft filename is `<id>.md` where `<id>` is a `reply_id` or `tweet_id`. Look up `<id>` in `data/csv/replies.csv` first; if not found, look it up in `data/csv/tweets.csv`. This tells you the item type (`reply` / `thread_reply` / `quote` vs `tweet`) and gives every other field (archetype, target, draft_text, etc.) for §2.4.
 
 If the row's `status` is already `approved` or `edited` (set by the dashboard, 01-spec.md §10.2), present it the same as any other draft — the dashboard records a human review decision, but every send still needs the in-session human gate (§1, principle 3). If `status=edited`, `draft_text` already reflects the dashboard's edit and `user_edited`/`edit_summary` are already set; note this for step 4 of §3 below.
 

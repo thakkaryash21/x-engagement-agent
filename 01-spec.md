@@ -14,7 +14,7 @@ requirements: [00-requirements.md](00-requirements.md)
 │  entry: AGENTS.md + mode prompt                             │
 │                                                             │
 │  reads:  data/   guidelines/   config/app.yaml              │
-│  writes: data/data/*.csv   data/drafts/   data/learnings/   │
+│  writes: data/csv/*.csv   data/drafts/   data/learnings/   │
 └───────────────┬─────────────────────────────────────────────┘
                 │ Codex control-chrome plugin
 ┌───────────────▼─────────────────────────────────────────────┐
@@ -35,7 +35,7 @@ The agent attaches to the user's already-open Chrome through Codex's `control-ch
 - The active persona's `chrome_profile` in `data/personas/<name>.md` tells the user which Chrome profile/account should be open.
 - Pre-flight checks confirm an X/Twitter tab is open and logged in as the expected persona. If not, the session stops and asks the user to open the right browser state.
 - **Human-mimicry rules** (hard requirements, codified in AGENTS.md): burst-pause scrolling, character-by-character typing, one focused tab, human-paced navigation, and no clipboard paste or JavaScript value injection.
-- If X shows a challenge, unusual-activity interstitial, logged-out state, or major UI breakage, stop immediately and log the incident in `data/data/incidents.csv`.
+- If X shows a challenge, unusual-activity interstitial, logged-out state, or major UI breakage, stop immediately and log the incident in `data/csv/incidents.csv`.
 
 ### 1.2 Why Codex CLI shapes the layout
 
@@ -223,7 +223,7 @@ Metric capture is **layered, not hard-coded to one source**. Two layers:
 
 Capture rule: take everything each layer offers; record which layer each value came from; absent values are written `n/a:<reason>` (e.g. `n/a:panel-unavailable`), never guessed. Analyses must never compare a Layer-2 metric on one item against a Layer-1 proxy on another as if equivalent.
 
-`data/config/metrics.yaml` makes the whole thing configurable — which metrics to capture per format, and which to *optimize* for (the review loop's objective), so targets can be narrowed once real data shows what matters:
+`config/metrics.yaml` makes the whole thing configurable — which metrics to capture per format, and which to *optimize* for (the review loop's objective), so targets can be narrowed once real data shows what matters:
 
 ```yaml
 capture:
@@ -342,7 +342,7 @@ The style doc gets a `## Confirmed` section (patterns seen ≥3 times) and a `##
 Triggered manually or by a Windows Task Scheduler entry running the Codex CLI daily with the `review` prompt.
 
 1. **Find due items**: CSV rows with `status=sent`, `review_due ≤ today`, `reviewed_at` empty.
-2. **Capture (layered, per §5.2)**: for each item, open the tweet detail page and record all Layer-1 public metrics; then, if the analytics panel is available for it (own posts), open it and record Layer-2 on top. Respect `data/config/metrics.yaml` for what to capture. Stamp `reviewed_at`.
+2. **Capture (layered, per §5.2)**: for each item, open the tweet detail page and record all Layer-1 public metrics; then, if the analytics panel is available for it (own posts), open it and record Layer-2 on top. Respect `config/metrics.yaml` for what to capture. Stamp `reviewed_at`.
 3. **Analyze** (only when ≥5 newly reviewed items, so learnings rest on batches, not single data points): join metrics to draft metadata and look for patterns across:
    - reply archetype × target tweet format → `engagement-targets.md` ("which posts to reply to")
    - content_type/topic × engagement_rate → `content-playbook.md` ("what works for this persona")

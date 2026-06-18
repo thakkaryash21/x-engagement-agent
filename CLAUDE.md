@@ -22,7 +22,7 @@ This lives inside this **standalone local workspace** — a self-contained repos
 From `00-requirements.md`'s ten capability pillars, distilled to what actually constrains design decisions:
 
 1. **The browser is the only integration.** No X API, no scrapers. Everything the agent "knows" about Twitter comes from looking at rendered pages, like a human.
-2. **Files are the whole system.** CSVs under `data/data/` = database. Markdown under `guidelines/`, `data/style/`, `data/learnings/`, and `data/writing/` = intelligence. `data/drafts/` = human review queue. The dashboard is a view/edit layer over these same files — never a second database.
+2. **Files are the whole system.** CSVs under `data/csv/` = database. Markdown under `guidelines/`, `data/style/`, `data/learnings/`, and `data/writing/` = intelligence. `data/drafts/` = human review queue. The dashboard is a view/edit layer over these same files — never a second database.
 3. **The agent never sends.** It drafts. A human gates every send. No code path posts without a preceding human action.
 4. **Full human mimicry is mandatory** (not just randomized delays): burst-pause scrolling, character-by-character typing, one focused tab, human-paced navigation. This is a ToS-risk mitigation, treated as a hard requirement everywhere.
 5. **Zero AI-tells.** Every draft passes the Anti-AI Bible (`data/writing/00_anti_ai_writing_bible.md`) as a hard gate — full rewrite on any tell, never a patch.
@@ -74,7 +74,7 @@ Plus five Shubham-specific checks before recording (read-aloud, actor, contribut
 
 `dashboard/server.py` runs a FastAPI backend at http://127.0.0.1:8787 and serves the built Vite React app from `dashboard/frontend/dist`. During frontend development, run the backend plus `npm run dev` and use http://127.0.0.1:5173; Vite proxies `/api` to FastAPI.
 
-The dashboard is a view/edit layer over the same files the modes use: draft review decisions update `data/drafts/` plus the CSV rows, Settings updates `data/config/*.yaml` and active persona state, Knowledge edits Markdown under `data/personas/`, `guidelines/`, `data/style/`, `data/writing/`, and `data/learnings/`, and Run launches a new local PowerShell/Codex session. See `dashboard/README.md`.
+The dashboard is a view/edit layer over the same files the modes use: draft review decisions update `data/drafts/` plus the CSV rows, Settings updates `config/*.yaml` and active persona state, Knowledge edits Markdown under `data/personas/`, `guidelines/`, `data/style/`, `data/writing/`, and `data/learnings/`, and Run launches a new local PowerShell/Codex session. See `dashboard/README.md`.
 
 ---
 

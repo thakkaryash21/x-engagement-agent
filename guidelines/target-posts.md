@@ -27,7 +27,7 @@ Each signal below maps to whether the persona has a credible angle. `review` mod
 
 ## Freshness / stage
 
-- Prefer tweets **< 4 hours old** with **< 30 replies** — early replies earn disproportionate visibility (the "early-reply hypothesis," tracked via `reply_rank` in `data/data/replies.csv`).
+- Prefer tweets **< 4 hours old** with **< 30 replies** — early replies earn disproportionate visibility (the "early-reply hypothesis," tracked via `reply_rank` in `data/csv/replies.csv`).
 - Skip tweets where the reply section is already saturated with the same take the persona would make — adding a 40th identical reply has no value for readers and no signal for us.
 
 ## Credible contribution gate

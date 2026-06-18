@@ -3,7 +3,7 @@
 last_updated: 2026-06-13
 status: hand-seeded (01-spec.md §4.3) — `learn` mode seeds real rows from the persona's interaction graph; `review` mode tunes the engage-gate thresholds below from outcomes
 
-Whenever `scroll` considers engaging with a tweet, it looks up or creates the author's row in `data/data/profiles.csv` and scores it against this rubric. This is what answers the four requirement-level questions: *do we engage with this tweet? would it be good for engagement? how is this user relevant to us? are they credible/reputed?*
+Whenever `scroll` considers engaging with a tweet, it looks up or creates the author's row in `data/csv/profiles.csv` and scores it against this rubric. This is what answers the four requirement-level questions: *do we engage with this tweet? would it be good for engagement? how is this user relevant to us? are they credible/reputed?*
 
 ---
 
@@ -28,7 +28,7 @@ A tweet is engagement-eligible (subject to `target-posts.md` already having pass
 relevance >= 3 AND credibility >= 3 AND (audience_activity >= 3 OR relationship != none)
 ```
 
-These thresholds are deliberately simple starting points. `review` mode may tune them in place (per the correction rule, 01-spec.md §8.1) once `data/data/profiles.csv` × `data/data/metrics.csv` shows which combinations of scores actually correlate with good outcomes — e.g. "relevance 3 + credibility 3 + audience_activity 2 + relationship=they-follow" performing as well as the current gate.
+These thresholds are deliberately simple starting points. `review` mode may tune them in place (per the correction rule, 01-spec.md §8.1) once `data/csv/profiles.csv` × `data/csv/metrics.csv` shows which combinations of scores actually correlate with good outcomes — e.g. "relevance 3 + credibility 3 + audience_activity 2 + relationship=they-follow" performing as well as the current gate.
 
 ### Shubham-specific overrides
 

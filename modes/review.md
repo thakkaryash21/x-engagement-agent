@@ -7,12 +7,12 @@ entry point: AGENTS.md §4.5 links here for the full procedure
 `review` is read-only with respect to drafting and sending — it never queues or posts anything (AGENTS.md §1). It visits tweets/replies that were sent ≥5 days ago, captures their current performance, and — once enough new data has accumulated — turns that performance into written learnings using the entry format and correction rule from 01-spec.md §8.1. Browses via the same mimicry rules (§3): a review session looks like the persona checking how their old posts did.
 
 Writes to:
-- `data/data/metrics.csv` (one row per capture; re-captures allowed, latest wins)
-- `data/data/replies.csv` / `data/data/tweets.csv` (stamps `reviewed_at`)
+- `data/csv/metrics.csv` (one row per capture; re-captures allowed, latest wins)
+- `data/csv/replies.csv` / `data/csv/tweets.csv` (stamps `reviewed_at`)
 - `data/learnings/content-playbook.md`, `data/learnings/timing-playbook.md`, `data/learnings/engagement-targets.md` (new/corrected entries)
 - `guidelines/profile-rubric.md` (engage-gate threshold tuning, in place)
 - `data/style/<persona>-twitter-style.md` (only `high`-confidence voice/phrasing rules)
-- `data/data/incidents.csv` (if an anomaly halts the session, AGENTS.md §6)
+- `data/csv/incidents.csv` (if an anomaly halts the session, AGENTS.md §6)
 
 ---
 
@@ -20,11 +20,11 @@ Writes to:
 
 Session Bootstrap (AGENTS.md §4.0) has run. `review` does not run the Cold-Start Guard (§5.1) — it analyzes what already happened, it doesn't draft.
 
-Read `data/config/metrics.yaml` for `capture.layer1` / `capture.layer2` (what to record) and `optimize` (what each format is judged on).
+Read `config/metrics.yaml` for `capture.layer1` / `capture.layer2` (what to record) and `optimize` (what each format is judged on).
 
 ## 1. Find due items
 
-Scan `data/data/replies.csv` and `data/data/tweets.csv` for rows where `status=sent`, `review_due <= today`, and `reviewed_at` is empty. This is the due set for this session. If empty, stop — nothing to review.
+Scan `data/csv/replies.csv` and `data/csv/tweets.csv` for rows where `status=sent`, `review_due <= today`, and `reviewed_at` is empty. This is the due set for this session. If empty, stop — nothing to review.
 
 ## 2. Capture (layered, per §5.2 of the spec)
 
@@ -36,7 +36,7 @@ For each due item, in order:
 4. **Confound columns**: note `author_liked` / `author_replied` / `author_reposted` (did the original author engage with our reply?), `follower_count_at_capture` (persona's current follower count), `notable_engagers` (handles of any high-clout accounts that engaged, if recognizable), and `target_tweet_views_at_capture` (for replies/quotes/thread-replies — how big the target tweet's stage is now, vs `target_tweet_views_at_draft`).
 5. Compute `engagement_rate = (likes_l1 + replies_l1 + reposts_l1 + bookmarks_l1) / views_l1` (Layer 1, so always computable). If `views_l1` is `n/a`, write `engagement_rate=n/a:no-views`.
 6. `days_since_sent = today - sent_at` (days).
-7. Append a row to `data/data/metrics.csv` with `item_id` = the `reply_id`/`tweet_id`, `item_type` = `reply | thread_reply | quote | tweet`, `captured_at` = now, and everything above. Re-captures of the same `item_id` are allowed (a later `review` run might re-check an item) — latest row wins for analysis.
+7. Append a row to `data/csv/metrics.csv` with `item_id` = the `reply_id`/`tweet_id`, `item_type` = `reply | thread_reply | quote | tweet`, `captured_at` = now, and everything above. Re-captures of the same `item_id` are allowed (a later `review` run might re-check an item) — latest row wins for analysis.
 8. Stamp `reviewed_at = now` on the row in `replies.csv`/`tweets.csv`.
 
 ## 3. Analyze (only when ≥5 newly reviewed items this session)
@@ -59,7 +59,7 @@ Group by (`sent_day_of_week`, `sent_hour_local`, `content_type`/`tweet_format`).
 
 ### 3.4 Target author rubric scores × outcomes → tune `profile-rubric.md`
 
-Join `target_author_handle` to `data/data/profiles.csv` for its rubric scores (relevance, credibility, audience_activity, relationship), and compare against `engagement_rate`/outcomes for items targeting that author. If a combination of scores below the current engage gate (`relevance >= 3 AND credibility >= 3 AND (audience_activity >= 3 OR relationship != none)`) is performing as well as combinations that pass it, that's evidence the gate threshold is too strict (or too loose, in the other direction). Per the correction rule, **rewrite the gate formula in `guidelines/profile-rubric.md` in place** when evidence is `high` confidence — don't add a second, competing formula.
+Join `target_author_handle` to `data/csv/profiles.csv` for its rubric scores (relevance, credibility, audience_activity, relationship), and compare against `engagement_rate`/outcomes for items targeting that author. If a combination of scores below the current engage gate (`relevance >= 3 AND credibility >= 3 AND (audience_activity >= 3 OR relationship != none)`) is performing as well as combinations that pass it, that's evidence the gate threshold is too strict (or too loose, in the other direction). Per the correction rule, **rewrite the gate formula in `guidelines/profile-rubric.md` in place** when evidence is `high` confidence — don't add a second, competing formula.
 
 ### 3.5 User-edited drafts × performance → fold into the style doc
 

@@ -3,7 +3,7 @@
 last_updated: 2026-06-13 (clarified Examples are register calibration, not templates — see scroll.md §2.6)
 status: hand-seeded (01-spec.md §4.2) — `learn` mode adds real examples per archetype from the persona's own history; `review` mode adds/edits failure modes from outcomes
 
-For each candidate tweet that passes `target-posts.md` and the profile gate (`profile-rubric.md`), `scroll` mode picks exactly one archetype below **before** writing the reply, and records it in `data/data/replies.csv` (`reply_archetype` column). This is the join key `review` mode uses to learn which archetype works on which tweet type (`data/learnings/engagement-targets.md`).
+For each candidate tweet that passes `target-posts.md` and the profile gate (`profile-rubric.md`), `scroll` mode picks exactly one archetype below **before** writing the reply, and records it in `data/csv/replies.csv` (`reply_archetype` column). This is the join key `review` mode uses to learn which archetype works on which tweet type (`data/learnings/engagement-targets.md`).
 
 **On the `Examples` under each archetype** (`modes/scroll.md` §2.6 calibration pass): these are register calibration — sentence length, directness, how concrete the language is — not templates. The candidate tweet's topic is almost never the example's topic. Never reuse an example's wording, subject matter, or framing in a new draft; use it only to judge what a Shubham reply at this archetype's register sounds like.
 

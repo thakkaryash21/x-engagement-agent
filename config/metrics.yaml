@@ -14,4 +14,3 @@ optimize:                      # per format; tune as understanding sharpens
   thread_reply: [profile_visits, new_follows, likes]
   quote:       [impressions, new_follows]
   tweet:       [impressions, engagement_rate, new_follows]
-

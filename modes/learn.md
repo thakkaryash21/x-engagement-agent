@@ -12,18 +12,18 @@ entry point: AGENTS.md §4.1 links here for the full procedure
 - `guidelines/tagging-playbook.md` (seeded tagging examples)
 - `data/learnings/content-playbook.md` (what performed, seed entries)
 - `data/learnings/engagement-targets.md` (historical patterns + incentive classification)
-- `data/data/profiles.csv` (interaction-graph rows)
-- `data/data/incidents.csv` (if an anomaly halts the session, AGENTS.md §6)
+- `data/csv/profiles.csv` (interaction-graph rows)
+- `data/csv/incidents.csv` (if an anomaly halts the session, AGENTS.md §6)
 
 `learn` is re-runnable to refresh any of the above. Re-running extends and corrects (per the correction rule, 01-spec.md §8.1/§9) — it never duplicates.
 
-`learn` does **not** write historical observations into `data/data/replies.csv`, `data/data/tweets.csv`, or `data/data/metrics.csv`. Those files belong to draft/send/review workflows unless a future spec change explicitly adds a raw learning-evidence table. In this procedure, historical evidence is distilled into the files listed above, with profile rows in `profiles.csv` and progress rows in `learn-progress.csv`.
+`learn` does **not** write historical observations into `data/csv/replies.csv`, `data/csv/tweets.csv`, or `data/csv/metrics.csv`. Those files belong to draft/send/review workflows unless a future spec change explicitly adds a raw learning-evidence table. In this procedure, historical evidence is distilled into the files listed above, with profile rows in `profiles.csv` and progress rows in `learn-progress.csv`.
 
 ---
 
 ## 0. Resume check
 
-`data/data/learn-progress.csv` tracks progress per persona and section, because a full pass over "all current tweets and replies, as far back as X serves them" (00-requirements.md pillar 8) can exceed one `session_time_limit_minutes` window.
+`data/csv/learn-progress.csv` tracks progress per persona and section, because a full pass over "all current tweets and replies, as far back as X serves them" (00-requirements.md pillar 8) can exceed one `session_time_limit_minutes` window.
 
 Use these section names:
 
@@ -121,11 +121,11 @@ The interaction graph can become much larger than one session can handle. Priori
 
 Visit every account in tiers 1-2 for a `complete` interaction graph. If time or user scope limits prevent this, visit the highest-signal accounts from tiers 1-4 and mark the section `seeded`, not `complete`.
 
-For each account not already in `data/data/profiles.csv`:
+For each account not already in `data/csv/profiles.csv`:
 
 1. Visit the profile (mimicry rules apply — reading dwell, no parallel tabs).
 2. Score it against every axis in `guidelines/profile-rubric.md` (category, follower_tier, role_clout, audience_activity, geography, relevance, credibility, relationship).
-3. Write the row to `data/data/profiles.csv`, with `engagement_outcomes` as a short free-text ledger built from step 1's classification of interactions with this account (e.g. "2 replies: 1 value-add got author-like, 1 quip no response").
+3. Write the row to `data/csv/profiles.csv`, with `engagement_outcomes` as a short free-text ledger built from step 1's classification of interactions with this account (e.g. "2 replies: 1 value-add got author-like, 1 quip no response").
 
 This is the network baseline that lets the engage/skip gate in `guidelines/profile-rubric.md` use real relationships instead of cold thresholds, per 01-spec.md §7 step 3.
 

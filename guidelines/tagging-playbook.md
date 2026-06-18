@@ -11,7 +11,7 @@ Active only when a `scroll` session runs with `--tagging` (01-spec.md, Operating
 
 - The tagged person is genuinely relevant to the point being made — pulling them into a discussion they'd plausibly want to see, a deserved shoutout/plug, or a humorous quip that involves them in a way they'd be fine with.
 - The tag adds value **for readers**, not just reach. If removing the @handle would make the tweet read identically, the tag is decorative — don't use it.
-- Consistent with `relationship` in `data/data/profiles.csv`: tagging someone with `relationship=none` is higher-risk and should have a stronger value justification than tagging a `mutual` or `real-life connection`.
+- Consistent with `relationship` in `data/csv/profiles.csv`: tagging someone with `relationship=none` is higher-risk and should have a stronger value justification than tagging a `mutual` or `real-life connection`.
 
 ## What this is NOT
 
@@ -20,7 +20,7 @@ Active only when a `scroll` session runs with `--tagging` (01-spec.md, Operating
 
 ## Guardrail: surfacing, not an allowlist
 
-The agent never needs pre-approval to **propose** a tag — only to **send** one, same as everything else (AGENTS.md §1, principle 3). The guardrail is that any draft containing a tag is flagged in the draft file and in `data/data/replies.csv`/`tweets.csv` (`tagged_users` column), and the dashboard's draft card shows a prominent callout: *"this draft tags @handle (category, follower tier, relationship: <value>)"*. The human makes the call per draft with full context — there is no pre-approved list of taggable accounts.
+The agent never needs pre-approval to **propose** a tag — only to **send** one, same as everything else (AGENTS.md §1, principle 3). The guardrail is that any draft containing a tag is flagged in the draft file and in `data/csv/replies.csv`/`tweets.csv` (`tagged_users` column), and the dashboard's draft card shows a prominent callout: *"this draft tags @handle (category, follower tier, relationship: <value>)"*. The human makes the call per draft with full context — there is no pre-approved list of taggable accounts.
 
 ## Drafting note
 

@@ -50,6 +50,17 @@ class DashboardStore:
     def data_rel(self, *parts: str) -> str:
         return str(self.data_path(*parts).relative_to(self.root)).replace("\\", "/")
 
+    def config_path(self, filename: str) -> Path:
+        path = (self.root / "config" / filename).resolve()
+        try:
+            path.relative_to(self.root / "config")
+        except ValueError as exc:
+            raise ValueError("path escapes config root") from exc
+        return path
+
+    def csv_rel(self, filename: str) -> str:
+        return self.data_rel("csv", filename)
+
     def safe_md_path(self, rel: str) -> Path:
         rel = rel.strip("/\\")
         if not rel.endswith(".md"):
@@ -122,22 +133,22 @@ class DashboardStore:
         return None
 
     def find_item(self, item_id: str) -> tuple[str | None, str | None, str | None, dict[str, str] | None]:
-        _, rows = self.read_csv(self.data_rel("data", "replies.csv"))
+        _, rows = self.read_csv(self.csv_rel("replies.csv"))
         for row in rows:
             if row.get("reply_id") == item_id:
-                return self.data_rel("data", "replies.csv"), "reply_id", row.get("format") or "reply", row
-        _, rows = self.read_csv(self.data_rel("data", "tweets.csv"))
+                return self.csv_rel("replies.csv"), "reply_id", row.get("format") or "reply", row
+        _, rows = self.read_csv(self.csv_rel("tweets.csv"))
         for row in rows:
             if row.get("tweet_id") == item_id:
-                return self.data_rel("data", "tweets.csv"), "tweet_id", "tweet", row
+                return self.csv_rel("tweets.csv"), "tweet_id", "tweet", row
         return None, None, None, None
 
     def read_limits(self) -> dict[str, int]:
-        text = self.data_path("config", "limits.yaml").read_text(encoding="utf-8")
+        text = self.config_path("limits.yaml").read_text(encoding="utf-8")
         return {m.group(1): int(m.group(2)) for m in re.finditer(r"^(\w+):\s*([0-9]+)", text, re.M)}
 
     def write_limits(self, updates: dict[str, Any]) -> dict[str, int]:
-        path = self.data_path("config", "limits.yaml")
+        path = self.config_path("limits.yaml")
         text = path.read_text(encoding="utf-8")
         for key, value in updates.items():
             if not isinstance(value, int) or isinstance(value, bool):
@@ -147,14 +158,14 @@ class DashboardStore:
         return self.read_limits()
 
     def read_metrics_yaml(self) -> dict[str, list[str]]:
-        text = self.data_path("config", "metrics.yaml").read_text(encoding="utf-8")
+        text = self.config_path("metrics.yaml").read_text(encoding="utf-8")
         result: dict[str, list[str]] = {}
         for match in re.finditer(r"^\s*(\w+):\s*\[(.*?)\]", text, re.M):
             result[match.group(1)] = [item.strip() for item in match.group(2).split(",") if item.strip()]
         return result
 
     def write_metrics_yaml(self, updates: dict[str, Any]) -> dict[str, list[str]]:
-        path = self.data_path("config", "metrics.yaml")
+        path = self.config_path("metrics.yaml")
         text = path.read_text(encoding="utf-8")
         for key, items in updates.items():
             if not isinstance(items, list):
@@ -293,7 +304,7 @@ class DashboardStore:
     def edit_rate(self) -> dict[str, int | float | None]:
         total_sent = 0
         edited = 0
-        for relpath in (self.data_rel("data", "replies.csv"), self.data_rel("data", "tweets.csv")):
+        for relpath in (self.csv_rel("replies.csv"), self.csv_rel("tweets.csv")):
             _, rows = self.read_csv(relpath)
             for row in rows:
                 if row.get("status") == "sent":
@@ -303,7 +314,7 @@ class DashboardStore:
         return {"sent": total_sent, "edited": edited, "rate": (edited / total_sent) if total_sent else None}
 
     def latest_metrics_by_item(self) -> dict[str, dict[str, str]]:
-        _, rows = self.read_csv(self.data_rel("data", "metrics.csv"))
+        _, rows = self.read_csv(self.csv_rel("metrics.csv"))
         latest: dict[str, dict[str, str]] = {}
         for row in rows:
             item_id = row.get("item_id")
@@ -314,7 +325,7 @@ class DashboardStore:
     def performance_breakdown(self) -> dict[str, dict[str, dict[str, float | int]]]:
         metrics = self.latest_metrics_by_item()
         by_archetype: dict[str, list[float]] = {}
-        _, replies = self.read_csv(self.data_rel("data", "replies.csv"))
+        _, replies = self.read_csv(self.csv_rel("replies.csv"))
         for row in replies:
             metric = metrics.get(row.get("reply_id", ""))
             rate = self.to_float(metric.get("engagement_rate") if metric else None)
@@ -322,7 +333,7 @@ class DashboardStore:
                 by_archetype.setdefault(row.get("reply_archetype") or "(unset)", []).append(rate)
 
         by_content_type: dict[str, list[float]] = {}
-        _, tweets = self.read_csv(self.data_rel("data", "tweets.csv"))
+        _, tweets = self.read_csv(self.csv_rel("tweets.csv"))
         for row in tweets:
             metric = metrics.get(row.get("tweet_id", ""))
             rate = self.to_float(metric.get("engagement_rate") if metric else None)
@@ -337,12 +348,12 @@ class DashboardStore:
     def api_insights(self) -> dict[str, Any]:
         return {
             "funnel": {
-                "replies": self.funnel_counts(self.data_rel("data", "replies.csv"), ["drafted", "approved", "edited", "discarded", "sent"]),
-                "tweets": self.funnel_counts(self.data_rel("data", "tweets.csv"), ["drafted", "approved", "edited", "discarded", "sent"]),
+                "replies": self.funnel_counts(self.csv_rel("replies.csv"), ["drafted", "approved", "edited", "discarded", "sent"]),
+                "tweets": self.funnel_counts(self.csv_rel("tweets.csv"), ["drafted", "approved", "edited", "discarded", "sent"]),
             },
             "edit_rate": self.edit_rate(),
             "performance": self.performance_breakdown(),
-            "profiles": self.read_csv(self.data_rel("data", "profiles.csv"))[1],
+            "profiles": self.read_csv(self.csv_rel("profiles.csv"))[1],
         }
 
     @staticmethod
@@ -351,11 +362,11 @@ class DashboardStore:
         return triggered and not (row.get("acknowledged_at") or "").strip()
 
     def api_incidents(self) -> dict[str, Any]:
-        _, rows = self.read_csv(self.data_rel("data", "incidents.csv"))
+        _, rows = self.read_csv(self.csv_rel("incidents.csv"))
         return {"incidents": rows, "locked_out": any(self.is_lockout_row(row) for row in rows)}
 
     def clear_lockout(self) -> dict[str, bool]:
-        fieldnames, rows = self.read_csv(self.data_rel("data", "incidents.csv"))
+        fieldnames, rows = self.read_csv(self.csv_rel("incidents.csv"))
         now = dt.datetime.now().isoformat(timespec="seconds")
         changed = False
         for row in rows:
@@ -363,7 +374,7 @@ class DashboardStore:
                 row["acknowledged_at"] = now
                 changed = True
         if changed:
-            self.write_csv(self.data_rel("data", "incidents.csv"), fieldnames, rows)
+            self.write_csv(self.csv_rel("incidents.csv"), fieldnames, rows)
         return {"ok": True, "cleared": changed}
 
     def read_md_file(self, rel: str) -> str:
@@ -410,4 +421,3 @@ class DashboardStore:
         }}
         self.write_run_state(state)
         return state
-

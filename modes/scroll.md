@@ -7,10 +7,10 @@ entry point: AGENTS.md §4.2 links here for the full procedure
 `scroll` browses the persona's timeline, selects tweets worth engaging with, and drafts replies/thread-replies/quotes into the review queue. It never sends (AGENTS.md §1, principle 3). Browses via the same mimicry rules (§3) — a scroll session looks like the persona reading their feed and occasionally stopping to reply. Pass `--tagging` to additionally explore tag-in candidates per `guidelines/tagging-playbook.md`.
 
 Writes to:
-- `data/data/replies.csv` (one row per draft, `status=drafted`)
-- `data/data/profiles.csv` (one row per author studied — including authors who fail the engage gate; studying is not engaging)
+- `data/csv/replies.csv` (one row per draft, `status=drafted`)
+- `data/csv/profiles.csv` (one row per author studied — including authors who fail the engage gate; studying is not engaging)
 - `data/drafts/<reply_id>.md` (the human review queue, template in §3 below)
-- `data/data/incidents.csv` (if an anomaly halts the session, AGENTS.md §6)
+- `data/csv/incidents.csv` (if an anomaly halts the session, AGENTS.md §6)
 
 ---
 
@@ -18,7 +18,7 @@ Writes to:
 
 Session Bootstrap (AGENTS.md §4.0) has already run: persona, voice guide, anti_ai_bible, style doc, territory/goals/red lines are loaded; Cold-Start Guard (§5.1) passed; Chrome is attached.
 
-From `data/config/limits.yaml`, hold in working memory for this session:
+From `config/limits.yaml`, hold in working memory for this session:
 - `max_drafts_per_session`, `session_time_limit_minutes` — hard stops (§4 below)
 - `min_seconds_between_actions` / `max_seconds_between_actions` — pacing between every discrete action
 - `min_hours_between_same_author`, `draft_staleness_hours` — duplicate/staleness guard inputs
@@ -52,13 +52,13 @@ Any failure → skip, no further steps, no profile lookup. This filter runs befo
 ### 2.2 Duplicate/staleness guard (AGENTS.md §5.2)
 
 Before doing any more work on this tweet:
-- Skip if any non-discarded row in `data/data/replies.csv` already has this `target_tweet_url`.
+- Skip if any non-discarded row in `data/csv/replies.csv` already has this `target_tweet_url`.
 - Skip if the persona already replied to this `target_author_handle` in the same thread (same root tweet).
-- Skip if this author appears in `data/data/replies.csv` with `drafted_at` (or `sent_at`, whichever is more recent) within `min_hours_between_same_author` hours.
+- Skip if this author appears in `data/csv/replies.csv` with `drafted_at` (or `sent_at`, whichever is more recent) within `min_hours_between_same_author` hours.
 
 ### 2.3 Profile check (`guidelines/profile-rubric.md`)
 
-Look up the author's handle in `data/data/profiles.csv`.
+Look up the author's handle in `data/csv/profiles.csv`.
 - **Not present**: visit the profile (mimicry rules apply — reading dwell, no parallel tabs), score all eight axes (category, follower_tier, role_clout, audience_activity, geography, relevance, credibility, relationship), and write a new row with `first_seen`/`last_updated` = now, `times_engaged=0`, `engagement_outcomes` empty.
 - **Present**: use the existing row. Re-score only if something material has obviously changed (e.g. a large follower-count jump); otherwise reuse stored values and just bump `last_updated`.
 
@@ -106,7 +106,7 @@ Run these additional Shubham-specific checks before recording:
 
 ### 2.7 Record and queue
 
-Generate `reply_id` as `YYYYMMDD-HHMM-<4char>`. Append a row to `data/data/replies.csv`:
+Generate `reply_id` as `YYYYMMDD-HHMM-<4char>`. Append a row to `data/csv/replies.csv`:
 
 | Column | Value at draft time |
 |---|---|
@@ -128,7 +128,7 @@ Generate `reply_id` as `YYYYMMDD-HHMM-<4char>`. Append a row to `data/data/repli
 | `reply_rank` | roughly how many replies already exist on the target tweet |
 | `review_due`, `reviewed_at` | empty — filled by `send` / `review` |
 
-Update the author's row in `data/data/profiles.csv`: increment `times_engaged` by 1 and append a short entry to `engagement_outcomes` (e.g. "drafted value-add reply, pending send") — this is the ledger `learn` mode and future profile checks build on.
+Update the author's row in `data/csv/profiles.csv`: increment `times_engaged` by 1 and append a short entry to `engagement_outcomes` (e.g. "drafted value-add reply, pending send") — this is the ledger `learn` mode and future profile checks build on.
 
 Then write `data/drafts/<reply_id>.md` using the template in §3.
 

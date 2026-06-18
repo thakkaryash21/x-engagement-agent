@@ -7,9 +7,9 @@ entry point: AGENTS.md §4.3 links here for the full procedure
 `compose` drafts original tweets — posts to the persona's own timeline, not replies. It never sends (AGENTS.md §1, principle 3) and does not take `--tagging` (that toggle is `scroll`-only, per `guidelines/tagging-playbook.md`). Browsing is for context only (the persona's own recent timeline, read to avoid repeating a point already made and to ground "what's actually happening" for build-update tweets) — mimicry rules (§3) still apply to any browsing done.
 
 Writes to:
-- `data/data/tweets.csv` (one row per draft, `status=drafted`)
+- `data/csv/tweets.csv` (one row per draft, `status=drafted`)
 - `data/drafts/<tweet_id>.md` (the human review queue, template in §3 below)
-- `data/data/incidents.csv` (if an anomaly halts the session, AGENTS.md §6)
+- `data/csv/incidents.csv` (if an anomaly halts the session, AGENTS.md §6)
 
 ---
 
@@ -17,13 +17,13 @@ Writes to:
 
 Session Bootstrap (AGENTS.md §4.0) has already run: persona, voice guide, anti_ai_bible, style doc, territory/goals/red lines loaded; Cold-Start Guard (§5.1) passed.
 
-From `data/config/limits.yaml`, hold for this session: `max_drafts_per_session`, `session_time_limit_minutes` (same caps `scroll` uses — drafts across `scroll` and `compose` sessions are counted separately per session, since each is its own session).
+From `config/limits.yaml`, hold for this session: `max_drafts_per_session`, `session_time_limit_minutes` (same caps `scroll` uses — drafts across `scroll` and `compose` sessions are counted separately per session, since each is its own session).
 
 ## 1. Topic and hook selection (`guidelines/compose-playbook.md`)
 
 Topic = the persona's `## Territory` crossed with `data/learnings/content-playbook.md`'s `## What's working` section (once `review` has populated it; otherwise territory alone — pick whatever the persona has something genuinely current to say about).
 
-Pick exactly one `content_type` (build-update, take, question, thread, quip) and a `hook_type` (free text) **before writing** — both get recorded in `data/data/tweets.csv`.
+Pick exactly one `content_type` (build-update, take, question, thread, quip) and a `hook_type` (free text) **before writing** — both get recorded in `data/csv/tweets.csv`.
 
 **An empty session is a valid outcome.** If nothing in-territory feels genuine right now, end the session with zero drafts rather than drafting something just to fill the cap.
 
@@ -43,7 +43,7 @@ If a genuinely different angle exists, draft one **Alt** using the same pipeline
 
 ## 3. Record and queue
 
-Generate `tweet_id` as `YYYYMMDD-HHMM-<4char>`. Append a row to `data/data/tweets.csv`:
+Generate `tweet_id` as `YYYYMMDD-HHMM-<4char>`. Append a row to `data/csv/tweets.csv`:
 
 | Column | Value at draft time |
 |---|---|
@@ -80,6 +80,6 @@ Same as `modes/scroll.md` §4: stop when `len(tweets.csv rows with drafted_at in
 
 ## Exit criteria
 
-Per 01-spec.md §11 Phase 6: `--tagging` (already wired in `modes/scroll.md` §2.4/§2.5 and `guidelines/tagging-playbook.md`) and `compose` are used in anger for a week without incident. An "incident" here means anything logged to `data/data/incidents.csv` (AGENTS.md §6) — not a draft the founder simply discards, which is normal queue hygiene.
+Per 01-spec.md §11 Phase 6: `--tagging` (already wired in `modes/scroll.md` §2.4/§2.5 and `guidelines/tagging-playbook.md`) and `compose` are used in anger for a week without incident. An "incident" here means anything logged to `data/csv/incidents.csv` (AGENTS.md §6) — not a draft the founder simply discards, which is normal queue hygiene.
 
 
