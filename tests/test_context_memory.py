@@ -383,6 +383,39 @@ def test_reflect_synthesizes_insight_chunk(store: ContextStore, memory: ContextM
     assert _insight_count() == 1
 
 
+def test_reflect_requires_subject(store: ContextStore, memory: ContextMemory):
+    """A scope-wide reflect (no subject) is refused for BOTH scopes — it would
+    concatenate every subject into one insight that outranks the specific chunk
+    it contains at retrieval time, and (for self) collapse to a slug-less dossier."""
+    store.add(
+        "acme shipped a feature",
+        {"scope": "world", "context_type": "factual", "importance": 0.6,
+         "entities": ["acme"], "subject_slug": "acme",
+         "created_at": NOW.isoformat(), "last_refreshed": NOW.isoformat(),
+         "chunk_id": "w1"},
+    )
+    assert memory.reflect("world") is None                       # no subject -> refused
+    assert memory.reflect("world", subject="acme") is not None   # per-subject works
+
+
+def test_write_back_rejects_slugless_self_finding(store: ContextStore, memory: ContextMemory):
+    """A self finding with no subject_slug is rejected (never silently dumped into a
+    shared self/<persona>/misc.md), and no dossier is created for it."""
+    result = memory.write_back([
+        _finding(text="shubham shipped onboarding", scope="self", persona="shubham",
+                 context_type="relational", reusable=True, subject_slug=""),
+    ])
+    assert result["rejected"]                          # surfaced, not silent
+    assert not result["promoted"] and not result["dossiers"]
+    assert not (store.context_dir / "self" / "shubham" / "misc.md").exists()
+    # A slugged self finding still promotes normally.
+    ok = memory.write_back([
+        _finding(text="shubham shipped onboarding", scope="self", persona="shubham",
+                 context_type="relational", reusable=True, subject_slug="onboarding"),
+    ])
+    assert ok["promoted"] or ok["merged"]
+
+
 # --- §5.4 style exemplars (diversity, NOT topical) ---------------------------
 
 def test_style_exemplars_selected_for_register_not_topic(store: ContextStore, memory: ContextMemory):
@@ -502,12 +535,14 @@ def test_reflect_self_isolated_by_persona(store: ContextStore, memory: ContextMe
              "created_at": NOW.isoformat(), "last_refreshed": NOW.isoformat(),
              "chunk_id": f"{persona}1"},
         )
-    insight = memory.reflect("self", persona="alice")
+    insight = memory.reflect("self", subject="alice-onboarding", persona="alice")
     assert insight is not None
     assert insight["persona"] == "alice"
     assert "alice" in insight["text"] and "bob" not in insight["text"]
-    # Without a persona, self-consolidation is refused (never mixes personas).
-    assert memory.reflect("self") is None
+    # Refused without a persona (never mixes personas)...
+    assert memory.reflect("self", subject="alice-onboarding") is None
+    # ...and refused without a subject (a scope-wide reflect pollutes retrieval).
+    assert memory.reflect("self", persona="alice") is None
 
 
 # --- Plan 08 fix 8: hybrid (dense + lexical) retrieval ------------------------

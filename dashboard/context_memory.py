@@ -187,16 +187,34 @@ class ContextMemory:
         text) and an explicit ``reusable`` verdict. Every promoted/merged chunk
         also creates/merges its Layer-1 dossier section (§5.1) — the chunk is the
         index, the dossier is the human-editable home. Returns a summary:
-        ``{promoted, merged, brief_only, evidence, dossiers, brief}``.
+        ``{promoted, merged, brief_only, evidence, dossiers, brief, rejected}``.
         """
         result: dict[str, list[str]] = {
             "promoted": [], "merged": [], "brief_only": [],
-            "evidence": [], "dossiers": [], "brief": [],
+            "evidence": [], "dossiers": [], "brief": [], "rejected": [],
         }
         decisions: list[dict[str, Any]] = []  # per-finding record for the Layer-2 brief
 
         for finding in findings:
             chunk = self._distill(finding)
+
+            # Invariant: durable self memory is subject-organized. A slug-less
+            # self finding would collapse into a single shared ``misc`` dossier,
+            # breaking per-subject retrieval / reflection / persona-scoped
+            # curation — so reject it *visibly* (never silently dump to misc)
+            # rather than trusting the caller to always supply a slug.
+            if chunk.get("scope") == "self" and not (chunk.get("subject_slug") or "").strip():
+                result["rejected"].append(chunk.get("text", "")[:80])
+                decisions.append({
+                    "text": chunk.get("text", ""),
+                    "scope": "self",
+                    "subject_slug": "",
+                    "provenance": chunk.get("provenance", ""),
+                    "evidence_id": "",
+                    "promotion": "rejected",
+                    "reason": "self finding requires a non-empty subject_slug",
+                })
+                continue
 
             # §5.7 — preserve the raw source immutably; the chunk indexes it.
             # ``evidence_id`` is "" when no real captured source exists; the
@@ -411,6 +429,12 @@ class ContextMemory:
         is honestly labeled ``context_type=insight`` / ``source_type=reflection``
         so a reader can tell interim consolidation apart from the future pass.
         """
+        # A reflection consolidates exactly ONE subject. A scope-wide reflect
+        # (no ``subject``) concatenates every subject into one giant insight that
+        # then outranks the specific chunk it contains at retrieval time (and,
+        # for self, collapses into a slug-less dossier) — refuse it.
+        if not subject:
+            return None
         # Persona isolation (Plan 08 fix 4 / review Finding B): self memory is
         # per-persona — refuse to consolidate it without a persona, or one insight
         # would fuse (and misattribute) multiple personas' lived experience.
