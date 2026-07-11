@@ -55,13 +55,14 @@ Update the row after every scroll burst (not just at session end) — if the ses
 
 ### 0.1 Scope level
 
-Before browsing, choose and record the scope in the relevant progress-row `notes`:
+Scope is chosen and recorded **per section** in that section's progress-row `notes` — it is **not** a single session-wide setting. Posts, Replies, and Likes may each carry a **different** bound (e.g. Replies back to `2024-01-01` but Posts and Likes only to `2025-01-01`); honor each independently. The forms:
 
-- `full_archive`: browse Posts/Replies until X stops serving older items.
-- `year_bound:<YYYY>`: browse until the start of that year or another explicit date boundary requested by the user.
-- `sampled_seed`: collect enough recent and representative evidence to seed style, targeting, profiles, and tagging. Use this only when the user explicitly accepts a non-exhaustive pass.
+- `full_archive`: browse until X stops serving older items.
+- `year_bound:<YYYY>` or a precise `year_bound:<YYYY-MM-DD>`: browse until the start of that year / that exact date boundary.
+- `date_bound:<start>..<end>` (both `YYYY-MM-DD`): a closed window, e.g. `date_bound:2025-01-01..2026-07-11`.
+- `sampled_seed`: collect enough recent, representative evidence rather than an exhaustive pass — use only when the user explicitly accepts a non-exhaustive pass (this is the default for Likes, §1.5).
 
-If the user says there is enough content, stop browsing and mark the relevant in-progress sections as `seeded` unless their exhaustive completion criteria were actually met.
+Record the chosen bound in each section's `notes` (existing rows already do). **X serving reality:** the rendered timeline often stops serving or jumps over older ranges — for Posts and Replies, backfill a boundary with the §1.1 dated `from:<handle> [filter:replies] since:YYYY-MM-DD until:YYYY-MM-DD` search; **Likes have no search operator**, so a Likes bound is capped by what the Likes tab actually renders (record where it truncated). If the user says there is enough content, stop and mark the section `seeded` unless the exhaustive completion criteria were met.
 
 ### 0.2 Category-focused passes
 
