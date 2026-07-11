@@ -39,6 +39,15 @@ A good reply rarely needs "everything about the subject" — it needs specific *
 
 The mapping *context-type → source + query style* is the core intelligence. Gap analysis emits a small structured set: `[{context_type, entity/claim, why_needed}]`. These five names — `identity` | `factual` | `temporal` | `discourse` | `relational` (`cultural` is an accepted alias for `discourse`) — **are** the `--gap-type` vocabulary passed to `context_cli search`, and the basis for the Layer-3 `gap_type` rollup (§5.1). Keep them as the one taxonomy; do not introduce a parallel set.
 
+### 2.1 What counts as a gap — treat your own knowledge as stale
+
+The most common enrichment failure is **false confidence**: the model reads a tweet, *feels* it already knows the subject, emits "no gaps," and drafts from generic, stale training memory — producing a reply that is plausible but non-specific, dated, or simply wrong. This is the single biggest reason a session does zero research when it should have done some. Guard against it:
+
+- **Your training knowledge is not a source.** It is stale (cut off before the tweet) and generic (no current specifics). It cannot tell you what a named product actually does *today*, what just shipped, whether a cited number is real, who a person currently is, or the live state of a discourse.
+- **A specific or current external fact that a load-bearing part of the reply depends on is a gap by default** — a metric/number the tweet cites, what a named person/company/product *is* or *just did*, whether a claim is true, the current sentiment around a subject — **even if you feel you know it.** Feeling that you already know a specific current fact is precisely the signal to distrust.
+- **The test:** *would I be filling this from training-pattern-matching, rather than from the tweet itself, from memory (`scope=world`/`self`), or from something I just verified?* If yes → it is a gap; route it (§3, §5).
+- **Only a genuine no-gap skips:** a pure quip on the visible wording, or a reply whose specificity comes entirely from the persona's own documented experience (`scope=self` memory). Do **not** manufacture a no-gap by choosing a vaguer angle or a lower-research archetype to *dodge* a fact you could have verified — decide the reply the candidate deserves, then resolve its gaps. Picking the angle that avoids research is the failure this step exists to catch.
+
 ---
 
 ## 3. Source-selection matrix — where each type lives
