@@ -1,6 +1,6 @@
 # File Map And Data Ownership
 
-last_updated: 2026-07-10
+last_updated: 2026-07-11
 status: canonical routing guide for agents and maintainers
 
 This project is file-backed. CSV files, Markdown files, YAML files, and draft files are all part of the database. Do not move, rename, or change their schemas/templates casually. If a schema or template needs to change, document the change first and update every reader/writer together.
@@ -13,11 +13,13 @@ These files are committed and define reusable behavior:
 - `CLAUDE.md`: development/onboarding guide for changing the repo.
 - `docs/file-map.md`: this routing guide. Update this when any file responsibility changes.
 - `docs/data-boundary.md`: public/private boundary and publish checks.
+- `docs/roadmap.md`: intentionally-deferred capabilities (designed and described in the prose but not yet executable), so mode docs point at one durable home instead of overclaiming.
 - `modes/*.md`: exact operating procedures for `learn`, `scroll`, `compose`, `send`, and `review`.
 - `guidelines/*.md`: reusable public playbooks and rubrics.
 - `guidelines/context-enrichment.md`: persona-neutral context-acquisition intelligence (context-type taxonomy, source-selection matrix, query-construction playbook, the four adapters + gap router) driving `modes/scroll.md` §2.4b.
 - `guidelines/format-playbooks/*.md`: format-specific drafting rules.
 - `dashboard/README.md`: dashboard behavior and limitations.
+- `dashboard/context_store.py` / `dashboard/context_memory.py` / `dashboard/context_cli.py`: the context-enrichment substrate (`ContextStore`), the policy layer (`ContextMemory`), and the CLI the modes invoke — `python -m dashboard.context_cli` (`search` / `write-back` / `reflect` / `style-exemplars` / `reindex`). Reads/writes the private `data/context/` stores.
 
 Public playbooks should stay persona-neutral. Persona-specific examples, real handles, company facts, voice quirks, local network notes, and private lessons belong under `data/`.
 
@@ -25,8 +27,8 @@ Public playbooks should stay persona-neutral. Persona-specific examples, real ha
 
 These files are committed and contain non-sensitive defaults:
 
-- `config/app.yaml`: app wiring such as `data_root`, dashboard port, and agent command.
-- `config/limits.yaml`: draft/session/send limits and pacing defaults.
+- `config/app.yaml`: app wiring such as `data_root`, dashboard port, agent command, and `agent_web_search` (enables Codex native off-X `--search` for context enrichment).
+- `config/limits.yaml`: draft/session/send limits, pacing defaults, and the context-enrichment budget (`max_context_lookups_per_session`, `context_research_time_budget_minutes`).
 - `config/metrics.yaml`: metric capture and optimization defaults.
 
 Do not put private persona/company data in `config/`.
@@ -46,6 +48,7 @@ Do not put private persona/company data in `config/`.
 - `data/drafts/*.md`: active human review queue.
 - `data/drafts/sent/`: sent draft archive.
 - `data/drafts/discarded/`: discarded draft archive.
+- `data/context/`: context-enrichment memory (gitignored). `subjects/<slug>.md` + `self/<persona>/<slug>.md` = Layer-1 dossiers (human-editable knowledge); `briefs/<reply_id>.md` = Layer-2 per-draft provenance; `evidence/` = immutable raw sources every fact traces to; `chunks/` = flat chunk records; `index/` = the derived, rebuildable vector index (`context_cli reindex` rebuilds it from the authoritative files). World memory is shared; `self/<persona>/` is isolated per persona.
 
 Markdown under `data/` is database state. Preserve headings and metadata fields unless a documented migration says otherwise.
 
