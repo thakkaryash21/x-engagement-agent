@@ -43,97 +43,97 @@ def create_app(root: Path | None = None) -> FastAPI:
 
     @app.get("/api/drafts")
     def drafts() -> dict[str, Any]:
-        return store.api_drafts()
+        return store.drafts.api_drafts()
 
     @app.post("/api/drafts/{item_id}/approve")
     def approve_draft(item_id: str, body: DraftAction) -> dict[str, Any]:
         try:
-            return store.approve_draft(item_id, body.edited_text)
+            return store.drafts.approve_draft(item_id, body.edited_text)
         except Exception as exc:
             raise api_error(exc) from exc
 
     @app.post("/api/drafts/{item_id}/discard")
     def discard_draft(item_id: str, body: DraftAction) -> dict[str, Any]:
         try:
-            return store.discard_draft(item_id, body.reason)
+            return store.drafts.discard_draft(item_id, body.reason)
         except Exception as exc:
             raise api_error(exc) from exc
 
     @app.get("/api/insights")
     def insights() -> dict[str, Any]:
-        return store.api_insights()
+        return store.insights.api_insights()
 
     @app.get("/api/incidents")
     def incidents() -> dict[str, Any]:
-        return store.api_incidents()
+        return store.incidents.api_incidents()
 
     @app.post("/api/incidents/clear-lockout")
     def clear_lockout() -> dict[str, Any]:
-        return store.clear_lockout()
+        return store.incidents.clear_lockout()
 
     @app.get("/api/config/limits")
     def limits() -> dict[str, int]:
-        return store.read_limits()
+        return store.config.read_limits()
 
     @app.post("/api/config/limits")
     def update_limits(body: dict[str, Any]) -> dict[str, int]:
         try:
-            return store.write_limits(body)
+            return store.config.write_limits(body)
         except Exception as exc:
             raise api_error(exc) from exc
 
     @app.get("/api/config/metrics")
     def metrics() -> dict[str, list[str]]:
-        return store.read_metrics_yaml()
+        return store.config.read_metrics_yaml()
 
     @app.post("/api/config/metrics")
     def update_metrics(body: dict[str, Any]) -> dict[str, list[str]]:
         try:
-            return store.write_metrics_yaml(body)
+            return store.config.write_metrics_yaml(body)
         except Exception as exc:
             raise api_error(exc) from exc
 
     @app.get("/api/config/persona")
     def persona() -> dict[str, Any]:
-        return {"active": store.active_persona(), "available": store.list_personas()}
+        return {"active": store.config.active_persona(), "available": store.config.list_personas()}
 
     @app.post("/api/config/persona")
     def update_persona(body: dict[str, Any]) -> dict[str, str | None]:
         try:
-            return store.write_active_persona(body.get("persona"), body.get("tagging"))
+            return store.config.write_active_persona(body.get("persona"), body.get("tagging"))
         except Exception as exc:
             raise api_error(exc) from exc
 
     @app.get("/api/knowledge")
     def knowledge() -> dict[str, Any]:
-        return store.api_knowledge()
+        return store.paths.api_knowledge()
 
     @app.get("/api/files")
     def files() -> dict[str, list[str]]:
-        return {"files": store.list_editable_md()}
+        return {"files": store.paths.list_editable_md()}
 
     @app.get("/api/file")
     def read_file(path: str) -> dict[str, str]:
         try:
-            return {"path": path, "content": store.read_md_file(path)}
+            return {"path": path, "content": store.paths.read_md_file(path)}
         except Exception as exc:
             raise api_error(exc) from exc
 
     @app.post("/api/file")
     def write_file(body: FileUpdate) -> dict[str, Any]:
         try:
-            return store.write_md_file(body.path, body.content)
+            return store.paths.write_md_file(body.path, body.content)
         except Exception as exc:
             raise api_error(exc) from exc
 
     @app.get("/api/run/state")
     def run_state() -> dict[str, Any]:
-        return store.read_run_state()
+        return store.runner.read_run_state()
 
     @app.post("/api/run/launch")
     def run_launch(body: RunLaunch) -> dict[str, Any]:
         try:
-            return store.launch_run(body.mode, body.persona, body.tagging)
+            return store.runner.launch_run(body.mode, body.persona, body.tagging)
         except Exception as exc:
             raise api_error(exc) from exc
 
