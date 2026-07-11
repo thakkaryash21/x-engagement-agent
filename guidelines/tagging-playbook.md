@@ -1,6 +1,6 @@
 # Tagging Playbook — the `--tagging` toggle
 
-last_updated: 2026-07-10
+last_updated: 2026-07-11
 status: hand-seeded — `learn` mode seeds real examples from the persona's historical tagging tweets into local data
 
 Active only when a `scroll` session runs with `--tagging` (`compose` does not take this flag). When active, the agent additionally considers whether a reply, thread-reply, or quote is *better* composed by tagging a relevant high-profile user, connection, or follower — archetype 7 ("Tag-in") in `reply-playbook.md`.
@@ -49,5 +49,7 @@ Tagged drafts carry higher social risk and deserve closer human review — mark 
 - Community/event tags work when the persona was actually present or directly part of the group being discussed. Pair them with concrete event/place context.
 - Multi-account credit blocks belong only in owned launch or event follow-ups where every tagged person had a visible role. Name the contribution or company; do not turn a normal reply into a tag roster.
 - Cofounder credit tags work best as a natural aside tied to a visible artifact, such as crediting who chose a launch detail. The tag documents shared work rather than borrowing reach.
+- Multi-account tags belong in owned event recaps when each handle identifies a co-judge, organizer, example company, or collaborator visible in the post.
+- A company tag in a hiring CTA is justified when the company is the actual hiring vehicle and the post names exact roles; it is not a generic distribution tag.
 
 
