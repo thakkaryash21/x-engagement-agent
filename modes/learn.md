@@ -4,16 +4,17 @@ last_updated: 2026-07-10
 status: hand-authored procedure for AGENTS.md §4.1
 entry point: AGENTS.md §4.1 links here for the full procedure
 
-`learn` is a read-only mode: it never drafts and never sends. It browses the active persona's own profile and network — Posts, Replies, and Likes tabs, plus interactions (mimicry rules, AGENTS.md §3, apply — a learn session looks like the persona re-reading their own profile) — and writes/extends:
+`learn` is a read-only mode: it never drafts and never sends (seeding the context memory subsystem in §6 writes to memory, not to X — the read-only-toward-X contract still holds). It browses the active persona's own profile and network — Posts, Replies, and Likes tabs, plus interactions (mimicry rules, AGENTS.md §3, apply — a learn session looks like the persona re-reading their own profile) — and writes/extends:
 
 - `data/style/<persona>-twitter-style.md` (the primary output — cornerstone #2 for drafting; voice patterns from Posts/Replies plus a framing taste note from Likes; the framing technique catalog itself extends the shared `data/writing/framing-structure.md`, §1.5)
 - `guidelines/reply-playbook.md` (real examples per archetype)
 - `guidelines/profile-rubric.md` (seeded taxonomy)
 - `guidelines/tagging-playbook.md` (seeded tagging examples)
-- `data/learnings/content-playbook.md` (what performed, seed entries)
+- `data/learnings/content-playbook.md` (what performed, seed entries — plus the "what/why content" dimension seeded by §6, `## What/why content`)
 - `data/learnings/engagement-targets.md` (historical patterns + incentive classification)
 - `data/csv/profiles.csv` (interaction-graph rows)
 - `data/csv/incidents.csv` (if an anomaly halts the session, AGENTS.md §6)
+- the **context memory subsystem** (§6, via `ContextMemory.write_back`): World subject dossiers/chunks and the persona's `scope=self` experiential store, consolidated by `ContextMemory.reflect`. This warm-starts the memory the drafting pipeline reads at draft time, so early `scroll` sessions are not cold.
 
 `learn` is re-runnable to refresh any of the above. Re-running extends and corrects per the correction rule — it never duplicates.
 
@@ -33,6 +34,9 @@ Use these section names:
 - `interaction_graph`
 - `tagging_history`
 - `synthesis`
+- `context_seed`
+
+`context_seed` (the §6 context-seeding pass) is a **new `section` value only — not a schema change.** It reuses the existing `COLUMNS_LEARN_PROGRESS` columns (`section`/`status`/`direction`/`last_processed_item_url`/`items_processed`/`session_count`/`notes`) exactly as every other section does; no new column is added. Because seeding can span the persona's entire history, it is resumable across sessions like the other sections.
 
 Use these statuses:
 
@@ -69,8 +73,9 @@ When the user asks to focus category-by-category, finish the current section bef
 4. `interaction_graph`
 5. `tagging_history`
 6. `synthesis`
+7. `context_seed`
 
-This avoids mixing voice, target-selection, profile-scoring, and tagging evidence before each category has enough signal.
+This avoids mixing voice, target-selection, profile-scoring, and tagging evidence before each category has enough signal. `context_seed` runs last: it reuses the sampled history the earlier passes already surfaced, so seeding operates over evidence the session has already read rather than re-scrolling.
 
 ---
 
@@ -179,6 +184,39 @@ Evidence handling:
 - `profiles.csv` is the structured home for author/profile scoring.
 - `learn-progress.csv` is the structured home for scope, coverage, date gaps, and resume points.
 - If future learning needs per-item auditability beyond these homes, add it as an explicit schema/template migration rather than overloading draft/review CSVs.
+
+---
+
+## 6. Context seeding — warm the memory subsystem (World + Self)
+
+`learn` is a **second entry point into the same context memory subsystem** the drafting pipeline reads at draft time — not a parallel one. It reuses the same acquisition intelligence (context-type taxonomy → source matrix → targeted queries) and the **same unified write-back** (`ContextMemory.write_back`) that live drafting uses; the only difference is that it is pointed at *past* history instead of a live candidate. So chunk schema, dedup/merge, and the promotion gate are all reused unchanged, and re-processing a tweet **merges** (bumps `last_refreshed`) rather than duplicating — the pass is idempotent by construction.
+
+This pass exists because an empty memory store cold-starts drafting: without it, early `scroll` sessions pay full enrichment cost against an empty store and the persona's Self well stays empty. Seeding fills both wells from the persona's own documented history.
+
+### 6.1 Per sampled historical tweet/reply — three writes
+
+For each sampled item, do three things (all via `ContextMemory.write_back`, which distills each finding into a chunk, dedups/merges, applies the promotion gate, and preserves raw evidence):
+
+- **(a) Seed WORLD dossiers.** Reconstruct the context the item was *responding to* — the subject/event/discourse/jargon it referenced at the time — using the World adapters (in-tab reading of the original thread; a bounded off-X or on-X lookup only when the reference doesn't resolve from the item alone). Write `scope=world` chunks tagged with the subject and its `context_type` (`identity` / `factual` / `temporal` / `cultural`). Result: when `scroll` later meets a similar subject, memory is warm, not cold.
+- **(b) Seed SELF memory.** Extract the self-facts the item *expressed* — a project mentioned, a lesson stated, an opinion taken, a relationship shown — and write `scope=self` chunks with `source_type=persona_history` and `confidence` set by how explicit the statement was (a stated outcome is `high`; an implied stance is `medium`/`low`). This is the primary way the Self store gets populated. Because every self chunk traces to the persona's own documented words (and carries `provenance` + an `evidence_id` to the preserved excerpt), it satisfies the no-invention contract by construction — this is what makes the "only reference documented experiences" red line (AGENTS.md §6) enforceable rather than aspirational. Never invent a self-fact to fill a gap; an unresolved personal claim is left out.
+- **(c) Capture CONTENT LOGIC.** Record *why this item said what it said* — which World-context plus which Self-experience produced which content/angle. This is the bridge between the two wells and the archetype decision (it teaches *which well to draw from for which situation*), and it is written to `data/learnings/content-playbook.md` under `## What/why content` (see that file for the entry format). Example shape (persona-neutral): "when a launch tweet in territory X appears, the persona replies with a lived-experience value-add drawn from their own shipping story, not a generic take."
+
+**Findings shape (what to pass to `write_back`).** Each finding is a dict with at least `text` plus the metadata fields the write-back schema owns — `scope` (`world` | `self`), `source_type`, `context_type`, `confidence`, `importance` (durability 0–1: a lasting lesson rates high, a passing detail low), `entities`, `provenance`, and `subject_slug` for world chunks; include the raw `evidence` (the on-X snapshot captured browser-only, or the persona-history excerpt) so the immutable evidence record is written. Let the promotion gate decide persistence — durable, reusable knowledge promotes to a dossier/the retrievable store; a one-off detail stays evidence/brief-only and never pollutes memory.
+
+### 6.2 Bounded, sampled, budgeted, resumable
+
+Seeding can span the persona's entire history, so it must be incremental — never an unbounded pass:
+
+1. **Sampling + budget.** Process a **bounded sample per session** — cap by a tweet count or a wall-clock/lookup budget analogous to the scroll-mode enrichment budget (`config/limits.yaml`). Prioritize **high-signal history** (own posts, high-engagement replies) over exhaustive coverage; a `sampled_seed` scope (§0.1) is the norm here, not `full_archive`.
+2. **Budget gate before any expensive lookup.** World reconstruction that needs an off-X or on-X lookup counts against the budget exactly as it would in `scroll`; in-tab reading of the already-open thread is free. When the budget is spent, stop seeding for the session and record the resume point — do not blow the session cap.
+3. **Resumable across sessions.** Track progress in `data/csv/learn-progress.csv` under the `context_seed` section (§0 — a new `section` *value*, no schema change), updating the row after every batch with `status`, `items_processed`, `last_processed_item_url`, and `direction`. Each session resumes where the last left off; the pass can run across many `learn` sessions. Mark `seeded` for a bounded/sampled pass and `in_progress` when the budget or `session_time_limit_minutes` interrupts it — reserve `complete` for an actually-exhaustive pass.
+4. **Idempotent.** Re-running over the same items merges via the write-back dedup (§6.1) rather than duplicating, so a re-run safely extends and refreshes coverage.
+
+### 6.3 Reflect after each seeding batch
+
+At the end of each seeding batch, call `ContextMemory.reflect(scope, subject)` over the subjects and the persona the batch just touched. Seeding *gathers* raw chunks; reflection makes them *coherent* — it synthesizes higher-level insight chunks that no single raw chunk holds (a subject's consolidated current state; the persona's recurring stance across scattered opinion chunks). Run it once per scope you seeded — `reflect(scope="self", subject=<persona-or-None>)` to consolidate the persona's stances, and `reflect(scope="world", subject=<slug>)` for each recurring subject the batch enriched. Reflections flow through the same dedup/merge, so running this every batch refines the one insight chunk instead of appending duplicates.
+
+Sequencing note: an empty Self store simply means world-only drafting (safe) — but running this seeding pass with its reflection *before* trusting `scroll`'s self-retrieval is what makes the Self well actually useful.
 
 ---
 

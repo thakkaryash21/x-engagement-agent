@@ -62,12 +62,13 @@ Pre-flight check at the start of any browser-touching mode:
 
 - Open tweets/profiles by clicking, the way a person does. Read with a dwell appropriate to content length before acting or navigating back.
 - One focused tab for the entire session. No parallel tabs, no background tabs for "checking something."
+- Exception — scoped research tab (context enrichment, `modes/scroll.md` §2.4b): the agent may open exactly one additional X tab to run a subject search, read recent tweets about that subject under §3.2 burst-pause mimicry, and must close it before returning to the timeline tab. Constraints: (1) at most one research tab open at any moment — never two; (2) it is serial, never concurrent — no automation acts on the timeline tab while the research tab is open, and vice versa; (3) it is opened, read, and closed within a single enrichment step, never left as a background tab; (4) the same pacing (§3.5) and burst-pause (§3.2) rules apply inside it. This preserves the no-concurrent-automation signature §3.4 exists to protect while matching how a human researches before replying.
 - In `scroll` mode, if the feed feels stale, repetitive, or exhausted, return to the X home timeline in the same tab and reload once before continuing. Fresh candidates are preferred over forcing drafts from old visible posts.
 
 ### 3.5 Pacing
 
 - Between discrete actions (scroll burst, click, navigation, draft save), wait a random interval between `min_seconds_between_actions` and `max_seconds_between_actions` (`config/limits.yaml`).
-- Session-level caps (`max_drafts_per_session`, `session_time_limit_minutes`, `max_sends_per_day`, `min_minutes_between_sends`) are read from `config/limits.yaml` at session start and enforced exactly — stop the session the instant either cap is hit, whichever comes first.
+- Session-level caps (`max_drafts_per_session`, `session_time_limit_minutes`, `max_sends_per_day`, `min_minutes_between_sends`, `max_context_lookups_per_session`, `context_research_time_budget_minutes`) are read from `config/limits.yaml` at session start and enforced exactly — stop the session (or, for the two context caps, stop enriching) the instant a cap is hit, whichever comes first. The two context caps bound expensive enrichment lookups and discourse-research tab wall-clock (`modes/scroll.md` §2.4b); dossier reads and in-tab navigation stay free.
 
 ---
 
@@ -91,7 +92,7 @@ Cold-start study of the persona's own tweets, replies, Likes, and network. **Ful
 
 ### 4.2 Mode: `scroll`
 
-Browse the timeline, select tweets per `guidelines/target-posts.md`, and draft replies/thread-replies/quotes into the queue. **Full procedure: [modes/scroll.md](modes/scroll.md)**. Pass `--tagging` to enable `guidelines/tagging-playbook.md` exploration for this session. Per candidate: target filter → duplicate/staleness guard (§5.2) → profile check/engage gate (`guidelines/profile-rubric.md`) → format decision → archetype decision (`guidelines/reply-playbook.md`) → draft (the drafting pipeline is owned by `modes/scroll.md` §2.6) → append to `data/csv/replies.csv` and write `data/drafts/<reply_id>.md`. Session caps stop the run per §3.5.
+Browse the timeline, select tweets per `guidelines/target-posts.md`, and draft replies/thread-replies/quotes into the queue. **Full procedure: [modes/scroll.md](modes/scroll.md)**. Pass `--tagging` to enable `guidelines/tagging-playbook.md` exploration for this session. Per candidate: target filter → duplicate/staleness guard (§5.2) → profile check/engage gate (`guidelines/profile-rubric.md`) → format decision → gap-gated context brief (step 2.4b — see `modes/scroll.md`) → archetype decision (`guidelines/reply-playbook.md`) → draft (the drafting pipeline is owned by `modes/scroll.md` §2.6) → append to `data/csv/replies.csv` and write `data/drafts/<reply_id>.md`. Session caps stop the run per §3.5.
 
 ### 4.3 Mode: `compose`
 
@@ -103,7 +104,7 @@ Walk `data/drafts/` oldest-first. For each draft: existence check, staleness che
 
 ### 4.5 Mode: `review`
 
-Find rows with `status=sent`, `review_due ≤ today`, `reviewed_at` empty. Capture layered metrics from `config/metrics.yaml`, join to draft metadata, and — only when ≥5 newly reviewed items exist — analyze and write learning entries to the three `data/learnings/*.md` files using the format and correction rule in `modes/review.md`. **Full procedure: [modes/review.md](modes/review.md)**. Promote high-confidence voice/phrasing rules to `data/style/<persona>-twitter-style.md`; targeting/timing rules and engage-gate tuning stay in `data/learnings/*.md` and `guidelines/profile-rubric.md`.
+Find rows with `status=sent`, `review_due ≤ today`, `reviewed_at` empty. Capture layered metrics from `config/metrics.yaml`, join to draft metadata, and — only when ≥5 newly reviewed items exist — analyze and write learning entries to the three `data/learnings/*.md` files using the format and correction rule in `modes/review.md`. The analysis also joins `csv/context-provenance.csv` (Layer 3) by `reply_id` to segment engagement by `context_used`/`gap_type`/`source_types`/`scope_blend` (findings → `engagement-targets.md`); grows the context memory subsystem from sent replies via `ContextMemory.write_back` in both scopes (world + self) plus the content-logic dimension, then `ContextMemory.reflect` after ingest; and reports a voice-authenticity ensemble (authorship-attribution + NLI self-consistency + AI-detector probe) as a dashboard, not one score. **Full procedure: [modes/review.md](modes/review.md)**. Promote high-confidence voice/phrasing rules to `data/style/<persona>-twitter-style.md`; targeting/timing rules and engage-gate tuning stay in `data/learnings/*.md` and `guidelines/profile-rubric.md`.
 
 ---
 

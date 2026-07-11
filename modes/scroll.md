@@ -1,6 +1,6 @@
 # Mode: `scroll` — browse, select, draft
 
-last_updated: 2026-07-10 (deduped shared facts to owning files; rewrote §2.6 pass 3 for variety; added anti-sameness gate)
+last_updated: 2026-07-10 (§2.4b step 2 source-selection now points to guidelines/context-enrichment.md §3/§5 instead of restating the routing map; added §2.4b Context brief + wiring into 2.5/2.6/2.7; added anti-flex/faithfulness/self-consistency draft checks; folded affective/burstiness/anti-RLHF refinements + style-exemplar retrieval into §2.6)
 status: hand-authored procedure for AGENTS.md §4.2
 entry point: AGENTS.md §4.2 links here for the full procedure
 
@@ -70,6 +70,31 @@ Apply the engage decision from `guidelines/profile-rubric.md` (Engage decision).
 - Otherwise, decide between **reply** and **quote** using `guidelines/format-playbooks/reply.md` and `quote.md`: quote only if the persona has a take bigger than the thread that should reach their own followers and stands alone without the quoted tweet; otherwise reply.
 - If `--tagging` is on, also consider whether a tag-in (`guidelines/tagging-playbook.md`, reply-playbook.md archetype 7) makes this reply/thread-reply/quote *better* — pulling in a relevant account adds value for readers, not just reach. Tagging never changes the format itself, only whether `tagged_users` is populated.
 
+### 2.4b Context brief (`guidelines/context-enrichment.md`)
+
+Before deciding the archetype, gather current, resolved context about the **subject** of the tweet (not just the author) so drafting doesn't retreat to a generic, subject-agnostic caveat. The full acquisition intelligence — the context-type taxonomy, source-selection matrix, query-construction playbook (with its two worked examples), the four adapters, and the gap router — lives in `guidelines/context-enrichment.md`. Read it; do not restate it here. This step is that playbook applied to one live candidate.
+
+The step is **gap-gated AND archetype-aware** — do not enrich on every candidate, or the session budget (`config/limits.yaml` → `max_context_lookups_per_session`) is blown:
+
+**Gating (before spending any budget):**
+1. **Archetype-aware pre-check:** peek at the likely archetype (run the 2.5 angle check first, or make a lightweight guess). `value-add` and `contrarian-with-receipts` → almost always enrich; `sharp question` → enrich if a gap exists; `quip` / `amplify+extend` / `plug` → usually skip (a quip lands on the visible tweet; a plug is governed by the no-fact-invention rule + `data/company-facts.md`, not the open web) unless the gap gate fires hard.
+2. **Budget gate:** if the session enrichment budget is spent, skip enrichment and draft without it — or skip the candidate — but never blow the session cap.
+
+**Acquisition sequence** (each stage is chain-of-thought or a structured emission; all mechanics per `guidelines/context-enrichment.md`):
+
+1. **Gap analysis.** Reading the tweet + local thread, ask: what would I need to know to reply *specifically* that I don't already know? Extract the concrete named entities, terms, and checkable claims first, then emit a structured gap set: `[{context_type, entity/claim, why_needed}]`. No gaps → skip enrichment, proceed to 2.5 with an empty brief (`context_used=none`).
+2. **Source selection.** For each gap, apply the source-selection matrix / gap router (`guidelines/context-enrichment.md` §3, §5) to pick the adapter. Do not restate the routing map here — it is owned there. One tweet commonly yields several gaps routed to different sources.
+3. **Query construction.** For each routed gap, build the *targeted* query in the source's syntax (X operators for (b); precise noun-phrases for (c)). Decompose multi-hop gaps; add multi-query/hypothetical-answer retrieval only where recall is at risk. Emit the query set before issuing anything.
+4. **Gather.** Execute: memory (0, free) — retrieve from **both scopes** via `ContextMemory.retrieve_content(query, scope=<blend>, gap_type=...)` per the archetype-gated blend (self-lean archetypes pull the persona's relevant documented experience, world-lean pull subject facts) → in-tab (a, cheap) → routed (b)/(c) for the residual *world* gap. Self is never gathered live from the open web — it comes only from memory seeded by `learn` and user input. Adapter (b) uses the scoped serial research tab (`guidelines/context-enrichment.md` §6 → AGENTS.md §3.4).
+5. **Grade context sufficiency.** After a gather pass, grade the accumulated context against the gap set: **good** (each gap has a grounded, non-stale answer) / **insufficient** (a load-bearing gap is unresolved or thin) / **ambiguous** (conflicting or low-confidence findings).
+   - **good** → proceed to distill.
+   - **insufficient/ambiguous** → **escalate one rung** (memory → on-X search → off-X web) and re-gather the residual gap, budget permitting. A memory hit that grades *stale* (old `created_at` on a temporal gap) escalates to live search rather than being trusted.
+   - escalation exhausted / budget hit / still graded thin twice → mark the residual `[VERIFY: ...]` or **skip** the candidate. The grade, not a vibe, decides escalate-vs-stop.
+6. **Distill + write-back.** Distill every adapter's findings into semantic chunks and route them through `ContextMemory.write_back(findings)`: everything used → the per-draft brief (Layer 2); the reusable subset (promotion gate) → dossiers + retrieval index (Layer 1), dedup/merged against existing chunks.
+7. **Assemble brief.** Populate the `ContextBrief` from the distilled chunks and mark anything still unresolved. If a load-bearing subject stays unresolved after the loop → **skip** the candidate (feeds 2.1's ambiguous-context hard-skip); do not draft a generic caveat.
+
+The brief then feeds 2.5 (archetype viability) and 2.6 (drafting), per the wiring notes in those steps.
+
 ### 2.5 Archetype decision (`guidelines/reply-playbook.md`)
 
 Pick exactly one archetype (value-add, sharp question, contrarian-with-receipts, quip, amplify+extend, plug, or tag-in if `--tagging` and 2.4 selected it) **before** writing, informed by the chosen format playbook. The Plug archetype's hard constraint is the no-fact-invention rule (AGENTS.md §6): any company/product claim that isn't source-backed uses `[VERIFY: ...]`.
@@ -81,7 +106,15 @@ Before moving to drafting, do an explicit angle check:
 3. Pick the angle only if it has a concrete actor and consequence, such as "hiring managers will trust the wrong signal," "support reps need permission boundaries," "a founder can test demand faster," or "docs become part of agent onboarding."
 4. If both angles are abstract, skip the tweet.
 
+**Brief-gated viability (2.4b feeds this check):** the brief makes "concrete actor and consequence" (step 3) far easier to satisfy with a resolved subject, and it constrains which archetypes are *honest*:
+- **Contrarian-with-receipts** is selectable **only if the brief actually produced receipts**; otherwise pick a different archetype or skip — never manufacture the receipts.
+- **Self-scope availability:** a `value-add-from-experience`, relationship-building, or grounded-contrarian angle is only honest if the 2.4b `scope=self` retrieval returned a *real* documented experience. If Self came back empty, that archetype is **not available** — draft world-only or skip; never invent the personal experience (AGENTS.md §6).
+
 ### 2.6 Draft (Anti-AI gate)
+
+**Context wiring (from 2.4b):** the `ContextBrief` is context for the drafting passes — consumed, never quoted verbatim. It gives the passes concrete nouns (satisfying the Actor and Read-aloud checks below) and current facts, so the framing pass can lead with something *specific and current* instead of a flat restatement of the target tweet. Discourse research from adapter (b) is what supplies the specific current angle that breaks the generic-caveat mold. The brief does **not** relax any existing gate — the new draft-quality checks (context-flex, faithfulness, self-consistency) sit *alongside* the existing Expertise / Read-aloud / Contribution checks.
+
+**Style-exemplar retrieval (register only, not content):** to condition voice, retrieve a handful of the persona's OWN tweets via `ContextMemory.style_exemplars(persona, k)`. These are selected for **stylistic diversity / coverage — explicitly NOT topical similarity to the target tweet** (topic-matching the exemplars measurably *hurts* voice imitation: the model overfits the matched topic's phrasing). They feed passes 2–3 (voice + framing) to condition *register only*; never lift their topics or wording (the calibration rule already forbids that). They are the persona's own words, so no fabrication risk.
 
 **Calibration pass (before writing)**: re-read the public archetype notes in `guidelines/reply-playbook.md`, then any local persona-specific calibration under `data/style/` and `data/learnings/`. These calibrate **register**, not content — sentence length, how direct vs. understated the point lands, how much setup (if any) precedes it, and the gap between what's said and what's implied. The example's topic is almost never the candidate tweet's topic. Do not borrow its wording, structure, subject matter, handle, or specific framing. The question is "what does this persona sound like at this register," never "what did this persona say last time."
 
@@ -101,6 +134,13 @@ Write the draft in this order — each pass operates on the output of the previo
    This pass is weighted *below* pass 2 — never override a `## Confirmed` voice rule or a red line to make something more varied.
 4. **Anti-AI Bible final pass** (`anti_ai_bible` path): scan the draft against every category in the bible. This is a **hard gate** — if any tell is found (structural, lexical, rhythm, formatting), **rewrite the draft from scratch**, not patch the flagged phrase. A patched sentence in an otherwise AI-shaped draft still reads as AI-shaped. This includes tells introduced by pass 3 — a forced "not just X but Y" contrast, or any of the forbidden tell families above, is still a tell even if it makes the draft more "engaging."
 
+   This pass also targets three evidence-backed tell categories beyond the bible's lexical/structural lists:
+   - **Affective authenticity (highest-leverage single check):** flat, even, emotionally-neutral affect is the single strongest AI tell. The draft should carry the persona's *genuine* reaction — irritation, amusement, conviction — as documented in their voice/style, not a neutral analyst register. A correct-but-affectless draft is a rewrite.
+   - **Sentence-length variance (burstiness):** human writing varies sentence length sharply; AI defaults to a uniform rhythm. Force length variance — this is the evidence-backed criterion behind pass 3's variety job.
+   - **Strip RLHF-default tells as a named category:** length inflation, reflexive hedging, repetition, and uniform rhythm are RLHF-induced defaults, not persona voice — cut them explicitly.
+
+   (Do not chase detector-defeat or exact length counts — keep archetype output specs as **bands**, not numbers; the human send-gate is the backstop.)
+
 The calibration pass and the four numbered passes are not independent rewrites — calibration sets the target register that the numbered passes should preserve while they fix vocabulary, apply style-doc rules, vary the framing, and strip AI tells.
 
 **Design-it-twice (mandatory for `value-add` and `amplify+extend`)**: these two archetypes are the ones that collapse into the mold, so for them draft a **second, structurally different angle** through the same pipeline — different opener, different skeleton, not the same move reworded. Keep the less formulaic of the two as the draft, and record the other as the **Alt**. For the other archetypes an Alt is optional — draft one only if a genuinely different second angle exists, and don't manufacture a weak one just to fill the template.
@@ -114,6 +154,22 @@ Run these draft-quality checks before recording:
 - **Contribution check**: the reply must add a concrete observation, joke, question, or relationship-building note. A cleaned-up paraphrase of the original tweet is still a fail.
 - **Forbidden phrasing check**: reject drafts containing "gets weird," "key phrase," "the real shift," "the interesting part is less," "operating system" as a metaphor, "model archaeology," "scar tissue," "frontier-lab shaped," or "becomes boring."
 - **Expertise check**: if the draft sounds like an expert in a domain the persona has not shown expertise in, skip the tweet instead of rewriting.
+
+- **Context-flex check (anti-flex)**: the brief informs *what's true and specific*, never *how much the persona appears to know*. This check operates **below and alongside** the gates above — it does not replace them.
+  - **"Would I say this out loud":** would the persona plausibly know and casually say this, without it reading as "I just looked this up"? Naming a fact the persona would naturally know (the product everyone's talking about) is fine; reciting a detail only a researcher-who-just-read-the-paper would cite is a flex — cut it or drop to a simpler angle. The brief's current developments should mostly shape *which take is defensible*, not appear verbatim as name-dropped facts (prefer "this changes X for founders" over "as [paper] showed with [metric]").
+  - Enrichment does **not** create expertise — reading one search result about a specialist domain does not make the persona an expert there; if the brief tempts the draft into a domain outside the persona's documented territory, the Expertise check still fires and the tweet is skipped.
+  - **Self-scope analog — no fabricated experience:** a `self` anecdote may appear **only** if it came from a real `scope=self` retrieval tracing to a documented source. Empty self-retrieval → no anecdote; never manufacture one to fill a value-add or relationship archetype.
+  - Voice outranks context (AGENTS.md §6): no brief fact justifies a draft that violates persona voice or red lines.
+
+- **Faithfulness check (grounding)**: every factual claim in the draft — about the subject *and* about the persona's own experience — must be grounded in what was retrieved.
+  1. Extract the draft's atomic claims (decompose it into individual factual assertions).
+  2. Verify each against the brief + retrieved chunks: every claim must trace to a retrieved chunk (world or self) or to `data/company-facts.md`. A claim with no supporting chunk is *unsupported*.
+  3. Act on unsupported claims — rewrite to drop/soften, mark `[VERIFY: ...]`, or skip. Never ship an unsupported factual claim. This catches drift the anti-flex check misses (e.g. a draft overstating a hedged source). It is re-checkable in `send` before the human approves.
+
+- **Self-consistency check (NLI)**: the draft must not *contradict* who the persona is (distinct from faithfulness, which catches invented facts).
+  1. Gather the persona's documented self-lines — relevant `scope=self` chunks retrieved this draft + persona-file positions + prior stated opinions.
+  2. For each, judge the draft against that line: **entailment or neutral = OK; contradiction = fail.**
+  3. Score `= max(entailment) − max(contradiction)` across the lines; a net-contradiction draft is **rewritten**, not shipped.
 
 ### 2.7 Record and queue
 
@@ -140,6 +196,8 @@ Generate `reply_id` as `YYYYMMDD-HHMM-<4char>`. Append a row to `data/csv/replie
 | `review_due`, `reviewed_at` | empty — filled by `send` / `review` |
 
 Update the author's row in `data/csv/profiles.csv`: increment `times_engaged` by 1 and append a short entry to `engagement_outcomes` (e.g. "drafted value-add reply, pending send") — this is the ledger `learn` mode and future profile checks build on.
+
+If 2.4b enriched this candidate, it also writes the Layer 3 review index row to `data/csv/context-provenance.csv` (keyed to `reply_id`; columns owned by `dashboard/tables.py`) — `context_used`, `gap_type`, `n_lookups`, `source_types`, `dossier_slugs`, and `scope_blend` (world/self/both) — the analytics shadow `review` joins to `replies.csv` for context→engagement analysis.
 
 Then write `data/drafts/<reply_id>.md` using the template in §3.
 
