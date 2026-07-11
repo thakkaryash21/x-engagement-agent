@@ -15,6 +15,8 @@ export interface DraftsResponse {
   drafts: DraftItem[];
 }
 
+// Mirrors incidents.csv — column set owned by dashboard/tables.py (COLUMNS_INCIDENTS).
+// Keep these keys in sync with that spec (10 columns, in header order).
 export interface Incident {
   incident_id?: string;
   occurred_at?: string;
@@ -22,8 +24,10 @@ export interface Incident {
   mode?: string;
   type?: string;
   description?: string;
+  session_action?: string;
   lockout_triggered?: string;
   acknowledged_at?: string;
+  notes?: string;
 }
 
 export interface IncidentsResponse {
