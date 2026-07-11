@@ -1,6 +1,6 @@
 # Context Enrichment — acquisition intelligence
 
-last_updated: 2026-07-10
+last_updated: 2026-07-11
 status: public generic playbook; persona-specific context lives under `data/`
 
 This is the single home for the **context-acquisition intelligence** the `scroll` mode runs in its Context Brief step (`modes/scroll.md` §2.4b). It defines *what kind of context a good reply needs, where each kind lives, and how to ask for it well*. `modes/scroll.md` references this file rather than restating it — keep the taxonomy, matrix, and playbook here only.
@@ -37,7 +37,7 @@ A good reply rarely needs "everything about the subject" — it needs specific *
 | **Cultural / discourse** | prevailing takes, sentiment, memes/in-jokes, controversy, the sides, community norms, the *vibe* | a hot take, a subtweet, an in-joke, a pile-on, an "everyone's saying X" | **X primary** (discourse lives in other tweets) → web (only for a summarized controversy) | X search on the subject with `min_faves:` for high-signal takes; read the replies/QTs |
 | **Relational** | tie to the persona's territory + prior engagements with this author/subject | any candidate (always check) | memory (dossiers + `profiles.csv` + prior `replies.csv`) | internal lookup, not a search |
 
-The mapping *context-type → source + query style* is the core intelligence. Gap analysis emits a small structured set: `[{context_type, entity/claim, why_needed}]`.
+The mapping *context-type → source + query style* is the core intelligence. Gap analysis emits a small structured set: `[{context_type, entity/claim, why_needed}]`. These five names — `identity` | `factual` | `temporal` | `discourse` | `relational` (`cultural` is an accepted alias for `discourse`) — **are** the `--gap-type` vocabulary passed to `context_cli search`, and the basis for the Layer-3 `gap_type` rollup (§5.1). Keep them as the one taxonomy; do not introduce a parallel set.
 
 ---
 
@@ -122,10 +122,17 @@ Drafting consumes a `ContextBrief` (a scratch object the mode holds for one cand
 
 **Execution order within a candidate:** dossier (0, free) → immediate (a, cheap, in-tab) → then route to (b) and/or (c) per the table, only for the residual gap, only until the brief is good enough for the chosen archetype, and only within the budget. (b) and (c) are the *expensive* adapters the budget caps.
 
+### 5.1 Provenance vocabulary (Layer-3 `context-provenance.csv`)
+
+The Layer-3 review index (`scroll` §2.7 writes one row per enriched draft; `review` §3.6 joins it to engagement) summarizes a draft's enrichment in **two controlled vocabularies, both owned here** and mirrored by the schema in `dashboard/tables.py`. Fill the row from these — do not invent tokens:
+
+- **`source_types`** — the set of adapters that actually contributed, one token per adapter, 1:1 with §5: `(0)` memory/dossier → `dossier`; `(a)` in-tab X navigation → `x_navigation`; `(b)` on-X research tab → `x_search`; `(c)` off-X `--search` → `web_search`. Record the subset that fired (e.g. a dossier hit plus one web lookup → `dossier,web_search`); empty when `context_used=false`.
+- **`gap_type`** — a per-draft **rollup of the §2 context-type taxonomy**, not a per-lookup value: `none` (no gap / no enrichment), a single context-type name (`identity` | `factual` | `temporal` | `discourse` | `relational`) when one kind of gap dominated the draft, or `mixed` when several context-types were resolved. This records the *gap kind*, not the *source*: a gap resolved locally in-tab is still logged by its context-type here and separately as `x_navigation` under `source_types` — there is deliberately **no** `local` gap-type.
+
 ---
 
 ## 6. On-X research and the one-tab rule
 
 Adapter (b) opens a second X tab, which conflicts with AGENTS.md §3.4 (*"one focused tab for the entire session"*). The intent of §3.4 is anti-detection: multiple concurrent tabs with automation activity across them is a bot signature no human produces. A human researching before a reply, by contrast, *does* open a second tab, reads it, and closes it — serially, one thing at a time.
 
-The reconciliation is a **scoped, serial research-tab exception owned by AGENTS.md §3.4**, not a relaxation of the anti-detection intent. That rule is authoritative; this file only points to it. In summary: the agent may open **exactly one** additional X tab to run a subject search, read under §3.2 burst-pause mimicry, and must **close it before returning** to the timeline tab — at most one research tab at any moment, serial (never concurrent with timeline automation), opened→read→closed within a single enrichment step, under the same pacing (§3.5) and burst-pause (§3.2) rules. Only adapter (b) uses the research tab; adapter (a) uses no extra tab. A research pass costs real wall-clock against `session_time_limit_minutes` and counts as one expensive lookup against `max_context_lookups_per_session`.
+The reconciliation is a **scoped, serial research-tab exception owned by AGENTS.md §3.4**, not a relaxation of the anti-detection intent. That rule is authoritative; this file only points to it. In summary: the agent may open **exactly one** additional X tab to run a subject search, read under §3.2 burst-pause mimicry, and must **close it before returning** to the timeline tab — at most one research tab at any moment, serial (never concurrent with timeline automation), opened→read→closed within a single enrichment step, under the same pacing (§3.5) and burst-pause (§3.2) rules. Only adapter (b) uses the research tab; adapter (a) uses no extra tab. A research pass costs real wall-clock against both `session_time_limit_minutes` and the research-tab sub-budget `context_research_time_budget_minutes`, and counts as one expensive lookup against `max_context_lookups_per_session` — stop opening research tabs the instant either the lookup cap or the research-time sub-budget is hit (`config/limits.yaml`).

@@ -1,6 +1,6 @@
 # Mode: `compose` — original tweets
 
-last_updated: 2026-07-10
+last_updated: 2026-07-11
 status: hand-authored procedure for AGENTS.md §4.3
 entry point: AGENTS.md §4.3 links here for the full procedure
 
@@ -31,7 +31,7 @@ Pick exactly one `content_type` (build-update, take, question, thread, quip) and
 
 **Calibration pass (before writing)**: re-read the "Key traits from actual tweets" examples in the voice guide's Twitter/X section (`voice_guide` path) that match the chosen `content_type` (observational wit, product criticism with specificity, dry industry commentary, etc.). These calibrate **register** — sentence length, directness, casing, complete-sentence framing, how much is stated vs. implied — not content. Do not reuse a past tweet's topic, wording, or specific framing; the goal is matching the *shape* of this persona's tweet for this `content_type`, not recycling one. Once `data/learnings/content-playbook.md` has `## What's working` entries, treat those the same way — as rules about what kind of content lands, never as text to lift.
 
-The drafting pipeline (the ordered passes and the Anti-AI hard gate) is owned by `modes/scroll.md` §2.6 — apply it verbatim here, with two compose-specific notes: (a) the calibration pass above uses the voice guide's Twitter/X examples rather than reply archetypes, and (b) the anti-sameness gate (§2.6) compares each draft to this session's prior original-tweet drafts, not to reply drafts.
+The drafting pipeline (the ordered passes and the Anti-AI hard gate) is owned by `modes/scroll.md` §2.6 — apply it verbatim here, with three compose-specific notes: (a) the calibration pass above uses the voice guide's Twitter/X examples rather than reply archetypes; (b) the anti-sameness gate (§2.6) compares each draft to this session's prior original-tweet drafts, not to reply drafts; and (c) compose runs no §2.4b Context Brief (there is no target tweet to enrich), so §2.6's two brief-dependent checks degrade as follows — **faithfulness** traces every atomic claim to `data/company-facts.md` or to retrieved memory rather than to a world brief; and **self-consistency / lived-experience** grounding comes only from an explicit Self retrieval (`python -m dashboard.context_cli search --scope self --persona <persona>`) when an original post leans on personal experience — with no Self hit, make no lived-experience claim, exactly as §2.6's context-flex rule requires. Style-exemplar retrieval (§2.6) still applies unchanged.
 
 Apply `guidelines/format-playbooks/original-tweet.md`: the tweet must stand alone (no surrounding context to lean on), length/structure follows the voice guide for the chosen `content_type`, and never thread-bait or generic engagement-bait phrasing (hard skip per the anti-engagement-bait rule, `guidelines/target-posts.md` → Format signals / Skip signals).
 

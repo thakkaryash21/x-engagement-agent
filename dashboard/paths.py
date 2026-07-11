@@ -97,6 +97,7 @@ class PathResolver:
             "persona": [str(p).replace("\\", "/") for p in sorted(self.data_path("personas").glob("*.md"))],
             "style": [str(p).replace("\\", "/") for p in sorted(self.data_path("style").glob("*.md"))],
             "learnings": [str(p).replace("\\", "/") for p in sorted(self.data_path("learnings").glob("*.md"))],
+            "writing": [str(p).replace("\\", "/") for p in sorted(self.data_path("writing").glob("*.md"))],
             "guidelines": [
                 str(p).replace("\\", "/")
                 for p in sorted((self.root / "guidelines").rglob("*.md"))

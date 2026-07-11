@@ -48,7 +48,7 @@ Do not put private persona/company data in `config/`.
 - `data/drafts/*.md`: active human review queue.
 - `data/drafts/sent/`: sent draft archive.
 - `data/drafts/discarded/`: discarded draft archive.
-- `data/context/`: context-enrichment memory (gitignored). `subjects/<slug>.md` + `self/<persona>/<slug>.md` = Layer-1 dossiers (human-editable knowledge); `briefs/<reply_id>.md` = Layer-2 per-draft provenance; `evidence/` = immutable raw sources every fact traces to; `chunks/` = flat chunk records; `index/` = the derived, rebuildable vector index (`context_cli reindex` rebuilds it from the authoritative files). World memory is shared; `self/<persona>/` is isolated per persona.
+- `data/context/`: context-enrichment memory (gitignored). `subjects/<slug>.md` + `self/<persona>/<slug>.md` = Layer-1 dossiers (human-editable knowledge); `briefs/<reply_id>.md` = Layer-2 per-draft provenance; `evidence/` = immutable raw sources every fact traces to; `chunks/` = flat chunk records; `sightings.json` = promotion-counter state (how many times a fact has recurred, gating promotion); `index/` = the derived, rebuildable vector index (`context_cli reindex` rebuilds it from the authoritative files). World memory is shared; `self/<persona>/` is isolated per persona.
 
 Markdown under `data/` is database state. Preserve headings and metadata fields unless a documented migration says otherwise.
 
@@ -62,7 +62,7 @@ Markdown under `data/` is database state. Preserve headings and metadata fields 
 - `profiles.csv`: studied author/account profiles.
 - `incidents.csv`: browser/account/security/UI incidents and lockout state.
 - `learn-progress.csv`: resumable learn-mode progress.
-- `context-provenance.csv`: Layer 3 context-enrichment review index, keyed to `reply_id` (join to `replies.csv`) — records `context_used`, `gap_type`, `n_lookups`, `source_types`, `dossier_slugs`, and `scope_blend` (world/self/both) for context→engagement joins in `review` mode.
+- `context-provenance.csv`: Layer 3 context-enrichment review index, keyed to `reply_id` (join to `replies.csv`) — records `context_used`, `gap_type`, `n_lookups`, `source_types`, `dossier_slugs`, and `scope_blend` (world/self/both) for context→engagement joins in `review` mode. The controlled vocabularies for `gap_type` (the §2 context-type rollup) and `source_types` (the adapter→token map) are owned by `guidelines/context-enrichment.md` §5.1.
 
 Do not change CSV headers without updating every mode, dashboard reader/writer, example CSV, and this document.
 

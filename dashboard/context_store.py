@@ -187,7 +187,12 @@ def _frontmatter_load(raw: str) -> tuple[dict[str, Any], str]:
 
 
 class ContextStore:
-    """The swappable substrate: ``add`` / ``search`` / ``reindex`` only."""
+    """The swappable substrate: ``add`` / ``search`` / ``search_lexical`` / ``reindex``.
+
+    Retrieval primitives only (dense + lexical FTS) — no ranking policy. The
+    blend, fusion, dedup, promotion and persona rules all live one layer up in
+    ``ContextMemory``.
+    """
 
     def __init__(
         self,
