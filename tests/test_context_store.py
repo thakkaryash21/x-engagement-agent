@@ -81,14 +81,46 @@ def test_search_scope_filter(store: ContextStore):
         "self experience about launch",
         _meta(chunk_id="s", scope="self", persona="p", subject_slug="launch"),
     )
-    world_hits = store.search("launch", k=10, scope="world")
+    world_hits = store.search("launch", k=10, filters={"scope": "world"})
     assert world_hits and all(h["scope"] == "world" for h in world_hits)
-    self_hits = store.search("launch", k=10, scope="self")
+    self_hits = store.search("launch", k=10, filters={"scope": "self"})
     assert self_hits and all(h["scope"] == "self" for h in self_hits)
+
+
+def test_search_generic_metadata_filter(store: ContextStore):
+    """The substrate applies only generic exact-metadata filters (SoC, fix 6)."""
+    store.add("acme identity fact", _meta(chunk_id="id", context_type="identity"))
+    store.add("acme cultural take", _meta(chunk_id="cu", context_type="cultural"))
+    hits = store.search("acme", k=10, filters={"context_type": "cultural"})
+    assert hits and all(h["context_type"] == "cultural" for h in hits)
+
+
+def test_store_owns_no_gap_routing(store: ContextStore):
+    """The substrate must not carry the gap_type->context_type acquisition map."""
+    import dashboard.context_store as mod
+
+    assert not hasattr(mod, "_GAP_TO_CONTEXT")
+    # search takes generic `filters`, not a `gap_type` acquisition arg.
+    import inspect
+
+    assert "gap_type" not in inspect.signature(store.search).parameters
+    assert "filters" in inspect.signature(store.search).parameters
 
 
 def test_search_empty_store_returns_empty(store: ContextStore):
     assert store.search("anything", k=5) == []
+
+
+def test_search_lexical_matches_exact_tokens(store: ContextStore):
+    """The lexical path retrieves an exact literal token (fix 8)."""
+    store.add("incident ERR-4021 root cause", _meta(chunk_id="hit", entities=["err-4021"]))
+    store.add("unrelated pricing discussion", _meta(chunk_id="miss", entities=["pricing"]))
+    hits = store.search_lexical("ERR-4021", k=5)
+    assert [h["chunk_id"] for h in hits] == ["hit"]
+    # Respects the same generic metadata filters as dense search.
+    assert store.search_lexical("ERR-4021", k=5, filters={"scope": "self"}) == []
+    # A query with no lexical tokens yields nothing (never crashes).
+    assert store.search_lexical("", k=5) == []
 
 
 def test_reindex_rebuilds_from_files(tmp_path: Path, fake_embedder):
@@ -110,3 +142,27 @@ def test_reindex_rebuilds_from_files(tmp_path: Path, fake_embedder):
     hits = rebuilt.search("pricing", k=5)
     assert any(h["chunk_id"] == "c1" for h in hits)
     assert {p.stem for p in rebuilt.chunks_dir.glob("*.md")} == {"c1", "c2", "c3"}
+
+
+def test_reindex_skips_and_reports_bad_files_and_swaps_on_success(tmp_path: Path, fake_embedder):
+    """Plan 08 fix 9: a corrupt chunk file is skipped + reported (not fatal), the
+    good chunks still reindex, and the live table is swapped only after the temp
+    build validated."""
+    context_dir = tmp_path / "data" / "context"
+    store = ContextStore(context_dir, embedder=fake_embedder)
+    store.add("good chunk about pricing", _meta(chunk_id="good", entities=["pricing"]))
+
+    # A malformed chunk file with no frontmatter — must not abort the rebuild.
+    (store.chunks_dir / "broken.md").write_text("no frontmatter here\n", encoding="utf-8")
+
+    count = store.reindex()
+    assert count == 1  # only the good chunk was staged + swapped in
+    assert [s["file"] for s in store.reindex_skipped] == ["broken.md"]
+    hits = store.search("pricing", k=5)
+    assert {h["chunk_id"] for h in hits} == {"good"}
+
+
+def test_add_rejects_unsafe_chunk_id(store: ContextStore):
+    """Injection hardening (fix 15): a traversal-y chunk_id is refused, never written."""
+    with pytest.raises(ValueError):
+        store.add("evil", _meta(chunk_id="../../etc/passwd"))
