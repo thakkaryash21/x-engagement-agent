@@ -1,6 +1,6 @@
 # Mode: `learn` — cold-start procedure
 
-last_updated: 2026-06-18
+last_updated: 2026-07-10
 status: hand-authored procedure for AGENTS.md §4.1
 entry point: AGENTS.md §4.1 links here for the full procedure
 
@@ -124,7 +124,7 @@ Visit every account in tiers 1-2 for a `complete` interaction graph. If time or 
 For each account not already in `data/csv/profiles.csv`:
 
 1. Visit the profile (mimicry rules apply — reading dwell, no parallel tabs).
-2. Score it against every axis in `guidelines/profile-rubric.md` (category, follower_tier, role_clout, audience_activity, geography, relevance, credibility, relationship).
+2. Score it against every axis in `guidelines/profile-rubric.md` (Rubric axes).
 3. Write the row to `data/csv/profiles.csv`, with `engagement_outcomes` as a short free-text ledger built from step 1's classification of interactions with this account (e.g. "2 replies: 1 value-add got author-like, 1 quip no response").
 
 This is the network baseline that lets the engage/skip gate in `guidelines/profile-rubric.md` use real relationships instead of cold thresholds.

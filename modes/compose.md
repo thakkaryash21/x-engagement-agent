@@ -1,6 +1,6 @@
 # Mode: `compose` — original tweets
 
-last_updated: 2026-06-18
+last_updated: 2026-07-10
 status: hand-authored procedure for AGENTS.md §4.3
 entry point: AGENTS.md §4.3 links here for the full procedure
 
@@ -25,15 +25,15 @@ Topic = the persona's `## Territory` crossed with `data/learnings/content-playbo
 
 Pick exactly one `content_type` (build-update, take, question, thread, quip) and a `hook_type` (free text) **before writing** — both get recorded in `data/csv/tweets.csv`.
 
-**An empty session is a valid outcome.** If nothing in-territory feels genuine right now, end the session with zero drafts rather than drafting something just to fill the cap.
+**An empty session is a valid outcome — but not a default escape hatch.** Before ending a session with zero drafts, attempt at least **3 distinct angles** across the persona's territory (different `content_type`/topic pairs, e.g. a build-update, a take, and a quip). Only bail to an empty session if all attempted angles genuinely fail the drafting pipeline (nothing source-backed to say, or every draft trips the Anti-AI/anti-sameness gates) — not merely because the first idea didn't land. If there is genuine in-territory material and `tweets.csv` keeps coming back empty, that is a drafting failure to fix (style doc / voice guide / playbooks), not a signal that the territory is empty.
 
 ## 2. Draft (Anti-AI gate)
 
 **Calibration pass (before writing)**: re-read the "Key traits from actual tweets" examples in the voice guide's Twitter/X section (`voice_guide` path) that match the chosen `content_type` (observational wit, product criticism with specificity, dry industry commentary, etc.). These calibrate **register** — sentence length, directness, casing, complete-sentence framing, how much is stated vs. implied — not content. Do not reuse a past tweet's topic, wording, or specific framing; the goal is matching the *shape* of this persona's tweet for this `content_type`, not recycling one. Once `data/learnings/content-playbook.md` has `## What's working` entries, treat those the same way — as rules about what kind of content lands, never as text to lift.
 
-Same pipeline as `modes/scroll.md` §2.6: persona voice guide → personal style doc (`## Confirmed` hard, `## Tentative` light) → framing/engagement pass (`data/style/<persona>-twitter-style.md` → `## Framing patterns (from Likes)`, weighted below the style doc — if the draft reads flat or report-like, rewrite its framing, not its idea) → Anti-AI Bible final pass (hard gate — any tell found, including ones introduced by the framing pass, means rewrite from scratch, not patch).
+The drafting pipeline (the ordered passes and the Anti-AI hard gate) is owned by `modes/scroll.md` §2.6 — apply it verbatim here, with two compose-specific notes: (a) the calibration pass above uses the voice guide's Twitter/X examples rather than reply archetypes, and (b) the anti-sameness gate (§2.6) compares each draft to this session's prior original-tweet drafts, not to reply drafts.
 
-Apply `guidelines/format-playbooks/original-tweet.md`: the tweet must stand alone (no surrounding context to lean on), length/structure follows the voice guide for the chosen `content_type`, and never thread-bait or generic engagement-bait phrasing (hard skip per the anti-engagement-bait rule, AGENTS.md §6).
+Apply `guidelines/format-playbooks/original-tweet.md`: the tweet must stand alone (no surrounding context to lean on), length/structure follows the voice guide for the chosen `content_type`, and never thread-bait or generic engagement-bait phrasing (hard skip per the anti-engagement-bait rule, `guidelines/target-posts.md` → Format signals / Skip signals).
 
 ### Threads (`content_type=thread`)
 
@@ -43,7 +43,7 @@ If a genuinely different angle exists, draft one **Alt** using the same pipeline
 
 ## 3. Record and queue
 
-Generate `tweet_id` as `YYYYMMDD-HHMM-<4char>`. Append a row to `data/csv/tweets.csv`:
+Generate `tweet_id` as `YYYYMMDD-HHMM-<4char>`. Append a row to `data/csv/tweets.csv`. The table below documents what this mode writes; the CSV column set and the `status` enum are owned in code by `dashboard/tables.py` (schema source of truth, per `docs/file-map.md`).
 
 | Column | Value at draft time |
 |---|---|
@@ -56,25 +56,11 @@ Generate `tweet_id` as `YYYYMMDD-HHMM-<4char>`. Append a row to `data/csv/tweets
 | `sent_at`, `sent_day_of_week`, `sent_hour_local` | empty — filled by `send` |
 | `review_due`, `reviewed_at` | empty — filled by `send` / `review` |
 
-Then write `data/drafts/<tweet_id>.md`:
-
-```markdown
-# Draft <tweet_id>
-**Content type**: <content_type>        **Hook**: <hook_type>
-
----
-<draft text — exactly what would be typed; thread segments separated by `===`>
----
-
-Alt (different angle, optional):
-<one alternate — non-thread drafts only>
-```
-
-This is the standard draft template with the Target/Author/Tweet/Archetype/Tagging lines omitted (no target tweet exists for an original tweet, per `guidelines/format-playbooks/original-tweet.md`).
+Then write `data/drafts/<tweet_id>.md` using the original-post template owned by [docs/file-map.md](../docs/file-map.md) (Draft Markdown Template) and, in code, by `dashboard/draft_file.py` (class `DraftFile`). It is the standard draft template with the Target/Author/Tweet/Archetype/Tagging lines omitted (no target tweet exists for an original tweet); thread segments are separated by `===`. Do not restate the template fields here.
 
 ## 4. Session stop conditions
 
-Same as `modes/scroll.md` §4: stop when `len(tweets.csv rows with drafted_at in this session) >= max_drafts_per_session`, or elapsed session time `>= session_time_limit_minutes`, whichever first.
+Same as `modes/scroll.md` §4 (caps and stop-logic owned by AGENTS.md §3.5): count `tweets.csv` rows with `drafted_at` in this session against `max_drafts_per_session`, and elapsed session time against `session_time_limit_minutes`.
 
 ---
 

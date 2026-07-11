@@ -1,6 +1,6 @@
 # Compose Playbook — original tweets
 
-last_updated: 2026-06-18
+last_updated: 2026-07-10
 status: hand-seeded — `review` mode tunes topic/hook choices from `data/learnings/content-playbook.md` and `data/learnings/timing-playbook.md`
 
 `compose` mode drafts original tweets (not replies). This file defines how a topic and a hook get selected before writing — both are chosen explicitly and recorded in `data/csv/tweets.csv` (`content_type`, `hook_type`) so the review loop can attribute performance to them.
@@ -29,7 +29,7 @@ The opening line/sentence pattern — recorded so `review` mode can correlate ho
 
 ## Drafting pipeline
 
-Same as `modes/scroll.md` §2.6: persona voice guide → style doc → Anti-AI Bible final pass (hard gate). Append to `data/csv/tweets.csv` (`status=drafted`), write the draft file per the template in `modes/compose.md` §3 (target/author lines omitted for original tweets).
+This file owns only topic and hook selection (above). The drafting pipeline itself — the ordered passes and the Anti-AI hard gate — is owned by `modes/scroll.md` §2.6 and applied for original tweets per `modes/compose.md` §2. The output row (`data/csv/tweets.csv`, `status=drafted`) and draft file follow that procedure. Do not restate the pipeline here.
 
 ---
 

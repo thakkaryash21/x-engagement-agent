@@ -1,6 +1,6 @@
 # Reply Playbook — archetypes
 
-last_updated: 2026-06-18
+last_updated: 2026-07-10
 status: public generic playbook; persona-specific calibration lives under `data/`
 
 For each candidate tweet that passes `target-posts.md` and the profile gate (`profile-rubric.md`), `scroll` mode picks exactly one archetype below **before** writing the reply, and records it in `data/csv/replies.csv` (`reply_archetype` column). This is the join key `review` mode uses to learn which archetype works on which tweet type (`data/learnings/engagement-targets.md`).
@@ -25,6 +25,8 @@ Tagging (archetype 7) is only available when the session runs with `--tagging`; 
 
 **When it fits**: the target tweet states a claim or observation the persona can genuinely add to from lived experience, current work, customer/user insight, or a verifiable source.
 
+**Output shape**: 1-2 sentences. Lead with the lived/owned specific — the thing the persona saw, shipped, hired around, or sold into — not a restatement of the tweet's number or claim. Does not look like: "[stat] is the signal / the line," then a knowing second-order caveat.
+
 **Checks**:
 - Name the actor affected: founder, customer, candidate, manager, user, operator, team, investor, reader.
 - Prefer concrete nouns and consequences over abstract mechanism talk.
@@ -42,6 +44,8 @@ Tagging (archetype 7) is only available when the session runs with `--tagging`; 
 **Definition**: a concise question that moves the conversation forward by surfacing a useful gap, tradeoff, or assumption.
 
 **When it fits**: the target tweet leaves an obvious open question and the persona can ask it naturally without posturing.
+
+**Output shape**: one sentence that ends on an actual unanswered question mark. Open on the specific gap, not a preamble. Does not look like: a statement wearing a question mark, or a thesis smuggled in as "just curious."
 
 **Checks**:
 - Keep it answerable by the author.
@@ -61,6 +65,8 @@ Tagging (archetype 7) is only available when the session runs with `--tagging`; 
 
 **When it fits**: the persona has a genuinely different view and can back it with a number, lived example, named precedent, or concrete mechanism.
 
+**Output shape**: 1-3 sentences — the disagreement, then the receipt (number, named precedent, lived example). Open on the point of difference, not "actually" or "I think." Does not look like: a vague "actually…" with no evidence attached.
+
 **Checks**:
 - Disagree with the idea, not the person.
 - Bring receipts or skip.
@@ -78,6 +84,8 @@ Tagging (archetype 7) is only available when the session runs with `--tagging`; 
 **Definition**: humor in the persona's register, as defined by `data/style/<persona>-twitter-style.md`.
 
 **When it fits**: the target tweet has an obvious comedic angle the persona would genuinely find funny.
+
+**Output shape**: one beat, one line, no analysis. Open on the joke; don't set it up. Does not look like: a joke followed by a sentence explaining it, or a "funny that X, and the winning detail is still 'maxim'" clincher.
 
 **Checks**:
 - The joke should land without explaining itself.
@@ -97,6 +105,8 @@ Tagging (archetype 7) is only available when the session runs with `--tagging`; 
 
 **When it fits**: the persona genuinely agrees and has something additive, not just a cleaner restatement.
 
+**Output shape**: 1-2 sentences — brief agreement, then the missing downstream half (who does something differently, what changes next, what incentive becomes visible). Open on that extension's specific, not "this is huge" or "X is doing a lot here." Does not look like: the target tweet reworded in polished language, or "the useful [role] is the one who can…".
+
 **Checks**:
 - The extension should be downstream and concrete: what changes next, who does something differently, or what incentive becomes visible.
 - If the second sentence says the same thing as the target tweet in polished language, rewrite or skip.
@@ -115,7 +125,9 @@ Tagging (archetype 7) is only available when the session runs with `--tagging`; 
 
 **When it fits**: the conversation is already about the problem the product/company/project solves, and the reference adds information the reader wants.
 
-**Hard constraint**: any factual claim, traction number, customer claim, launch claim, or comparison must trace to `data/company-facts.md` or another persona-approved local source. If the fact is not there, the draft flags `[VERIFY: ...]` instead of stating it.
+**Output shape**: 1-2 sentences with the reference sitting inside a genuine answer to the thread's problem. Open on the reader's problem, not the product. Does not look like: "check out [product]" bolted onto an otherwise unrelated reply.
+
+**Hard constraint**: the no-fact-invention rule (AGENTS.md §6) applies in full — any factual claim, traction number, customer claim, launch claim, or comparison that isn't source-backed makes the draft flag `[VERIFY: ...]` instead of stating it.
 
 **Known failure modes**:
 - Cold redirects to "check us out."
@@ -129,6 +141,8 @@ Tagging (archetype 7) is only available when the session runs with `--tagging`; 
 **Definition**: pulls a relevant person, company, or account into the discussion as a genuine value-add, credit, introduction, or context.
 
 **When it fits**: only when `--tagging` is active. Full rules live in `tagging-playbook.md`.
+
+**Output shape**: one sentence that names why the tagged account belongs in the thread (credit, intro, context). Open on the reason, not the handle. Does not look like: a bare "@handle 👀"-style reach tag.
 
 **Checks**:
 - The tag must clarify context or help readers.

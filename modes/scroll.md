@@ -1,6 +1,6 @@
 # Mode: `scroll` — browse, select, draft
 
-last_updated: 2026-06-18 (generalized draft gates and moved persona-specific calibration to data/)
+last_updated: 2026-07-10 (deduped shared facts to owning files; rewrote §2.6 pass 3 for variety; added anti-sameness gate)
 status: hand-authored procedure for AGENTS.md §4.2
 entry point: AGENTS.md §4.2 links here for the full procedure
 
@@ -45,7 +45,7 @@ For each candidate tweet:
 
 ### 2.1 Target filter (`guidelines/target-posts.md`)
 
-Check, in order: topic filter (does it fall in the active persona's `## Territory`?), format signal (does the table in `target-posts.md` mark this format as a credible angle?), freshness/stage (<4h old, <30 replies, reply section not saturated), and hard skip signals (rage bait, ambiguous context, unverifiable claims, red-line topics).
+Check, in order: topic filter (does it fall in the active persona's `## Territory`?), format signal (does the table in `target-posts.md` mark this format as a credible angle?), freshness/stage (`guidelines/target-posts.md` → Freshness / stage owns the thresholds), and hard skip signals (rage bait, ambiguous context, unverifiable claims, red-line topics).
 
 Any failure → skip, no further steps, no profile lookup. This filter runs before studying the author on purpose: an out-of-territory tweet from a great author is still a skip.
 
@@ -59,20 +59,20 @@ Before doing any more work on this tweet:
 ### 2.3 Profile check (`guidelines/profile-rubric.md`)
 
 Look up the author's handle in `data/csv/profiles.csv`.
-- **Not present**: visit the profile (mimicry rules apply — reading dwell, no parallel tabs), score all eight axes (category, follower_tier, role_clout, audience_activity, geography, relevance, credibility, relationship), and write a new row with `first_seen`/`last_updated` = now, `times_engaged=0`, `engagement_outcomes` empty.
+- **Not present**: visit the profile (mimicry rules apply — reading dwell, no parallel tabs), score all rubric axes (`guidelines/profile-rubric.md` → Rubric axes), and write a new row with `first_seen`/`last_updated` = now, `times_engaged=0`, `engagement_outcomes` empty.
 - **Present**: use the existing row. Re-score only if something material has obviously changed (e.g. a large follower-count jump); otherwise reuse stored values and just bump `last_updated`.
 
-Apply the engage decision: `relevance >= 3 AND credibility >= 3 AND (audience_activity >= 3 OR relationship != none)`. If it fails, the profile row is still saved (studying ≠ engaging) — skip to the next candidate.
+Apply the engage decision from `guidelines/profile-rubric.md` (Engage decision). If it fails, the profile row is still saved (studying ≠ engaging) — skip to the next candidate.
 
 ### 2.4 Format decision
 
-- If the target tweet is part of a longer thread (has parent tweets, or is itself a reply with visible ancestors), the format is **thread_reply**: expand and read the full thread first — all parents back to the root, and at least the first 20 tweets if the thread is long (`guidelines/format-playbooks/thread-reply.md`, hard rule). Note the thread position replied to.
+- If the target tweet is part of a longer thread (has parent tweets, or is itself a reply with visible ancestors), the format is **thread_reply**: before drafting, expand and read the full thread per the hard rule owned by `guidelines/format-playbooks/thread-reply.md`. Note the thread position replied to.
 - Otherwise, decide between **reply** and **quote** using `guidelines/format-playbooks/reply.md` and `quote.md`: quote only if the persona has a take bigger than the thread that should reach their own followers and stands alone without the quoted tweet; otherwise reply.
 - If `--tagging` is on, also consider whether a tag-in (`guidelines/tagging-playbook.md`, reply-playbook.md archetype 7) makes this reply/thread-reply/quote *better* — pulling in a relevant account adds value for readers, not just reach. Tagging never changes the format itself, only whether `tagged_users` is populated.
 
 ### 2.5 Archetype decision (`guidelines/reply-playbook.md`)
 
-Pick exactly one archetype (value-add, sharp question, contrarian-with-receipts, quip, amplify+extend, plug, or tag-in if `--tagging` and 2.4 selected it) **before** writing, informed by the chosen format playbook. The Plug archetype's hard constraint applies: any company/product claim must trace to `data/company-facts.md` or another persona-approved local source, otherwise the draft uses `[VERIFY: ...]`.
+Pick exactly one archetype (value-add, sharp question, contrarian-with-receipts, quip, amplify+extend, plug, or tag-in if `--tagging` and 2.4 selected it) **before** writing, informed by the chosen format playbook. The Plug archetype's hard constraint is the no-fact-invention rule (AGENTS.md §6): any company/product claim that isn't source-backed uses `[VERIFY: ...]`.
 
 Before moving to drafting, do an explicit angle check:
 
@@ -89,14 +89,25 @@ Write the draft in this order — each pass operates on the output of the previo
 
 1. **Persona voice guide** (`data/personas/<active>.md` → `voice_guide` path): vocabulary, tone, territory framing, red lines.
 2. **Personal style doc** (`data/style/<persona>-twitter-style.md`): apply every `## Confirmed` rule as a hard constraint; weight `## Tentative` rules lightly.
-3. **Framing/engagement pass** (`data/style/<persona>-twitter-style.md` → `## Framing patterns (from Likes)`): read the draft as a reader would — does it lead with something concrete or surprising, take a position, or land on a point, or does it just restate the target tweet in a flatter, more report-like way? If it reads flat or dry, rewrite the **framing** (not the underlying idea or contribution) using one of the Confirmed/Tentative techniques in that section — e.g. lead with the specific detail before the abstract point, set up a contrast and resolve it in one beat, close on a dry understatement instead of trailing off neutrally. This pass is weighted *below* pass 2 — never override a `## Confirmed` voice rule or a red line to make something punchier.
-4. **Anti-AI Bible final pass** (`anti_ai_bible` path): scan the draft against every category in the bible. This is a **hard gate** — if any tell is found (structural, lexical, rhythm, formatting), **rewrite the draft from scratch**, not patch the flagged phrase. A patched sentence in an otherwise AI-shaped draft still reads as AI-shaped. This includes tells introduced by pass 3 — a forced "not just X but Y" contrast is still a tell even if it makes the draft more "engaging."
+3. **Framing/variety pass** (`data/style/<persona>-twitter-style.md` → `## Framing patterns (from Likes)`): read the draft as a reader would — does it lead with something concrete or surprising, take a position, or land on a point, or does it just restate the target tweet in a flatter, more report-like way? Then — and this is the pass's real job — pick a framing that **differs from this session's prior drafts**. Do not converge every reply on the same "lead with a contrast, resolve in one beat, land a punchy clincher" mold: punchiness has one shape, and a whole session of identically-shaped replies is the failure this pass exists to prevent. When you rewrite the framing (never the underlying idea or contribution), draw from the Confirmed/Tentative techniques in that section **and** match the framing to the chosen archetype's **Output shape** in `guidelines/reply-playbook.md`, so that `quip` ≠ `value-add` ≠ `sharp question` ≠ `amplify` in the final text.
 
-The calibration pass and the four numbered passes are not independent rewrites — calibration sets the target register that the numbered passes should preserve while they fix vocabulary, apply style-doc rules, sharpen the framing, and strip AI tells.
+   **Forbidden tell families** (hard reject — rewrite from a different angle, do not patch). These pass lexical checks but are exactly the mold this pipeline over-produces:
+   - `[stat/number] is the signal` / `is the line` / `is the tell` — declaring what a number "really" signals.
+   - `X is doing a lot here` — crediting one element with hidden weight.
+   - `the useful [role] is the one who can…` — defining the valuable person via a capability.
+   - `now the hard part is [A, B, and C]` — a rule-of-three pivot appended after a concession.
+   - a **fabricated quote as the clincher** — a made-up maxim in "quotes" used as the closing line.
 
-If a genuinely different second angle exists, draft one **Alt** using the same pipeline. Alts are optional — don't manufacture a weak one just to fill the template.
+   This pass is weighted *below* pass 2 — never override a `## Confirmed` voice rule or a red line to make something more varied.
+4. **Anti-AI Bible final pass** (`anti_ai_bible` path): scan the draft against every category in the bible. This is a **hard gate** — if any tell is found (structural, lexical, rhythm, formatting), **rewrite the draft from scratch**, not patch the flagged phrase. A patched sentence in an otherwise AI-shaped draft still reads as AI-shaped. This includes tells introduced by pass 3 — a forced "not just X but Y" contrast, or any of the forbidden tell families above, is still a tell even if it makes the draft more "engaging."
+
+The calibration pass and the four numbered passes are not independent rewrites — calibration sets the target register that the numbered passes should preserve while they fix vocabulary, apply style-doc rules, vary the framing, and strip AI tells.
+
+**Design-it-twice (mandatory for `value-add` and `amplify+extend`)**: these two archetypes are the ones that collapse into the mold, so for them draft a **second, structurally different angle** through the same pipeline — different opener, different skeleton, not the same move reworded. Keep the less formulaic of the two as the draft, and record the other as the **Alt**. For the other archetypes an Alt is optional — draft one only if a genuinely different second angle exists, and don't manufacture a weak one just to fill the template.
 
 Run these draft-quality checks before recording:
+
+- **Anti-sameness gate (session-level)**: compare this draft's skeleton — its opener and its structural move — against every draft already recorded this session (§2.7). If the opener or the structure repeats one already used (especially the "[number] → what it signals → knowing second-order caveat" move), rewrite from a different angle before recording. This is the cross-draft locality the per-draft Anti-AI gate cannot provide: each draft can pass the bible individually while the session as a whole reads identical.
 
 - **Read-aloud check**: would the persona plausibly say this sentence to the intended audience without needing to explain what the nouns mean? If not, rewrite.
 - **Actor check**: every abstract noun should resolve to a person, team, product, or decision. If the draft says "workflow," "provider," "company," "system," "edge case," or "model" without a clear referent, rewrite.
@@ -106,7 +117,7 @@ Run these draft-quality checks before recording:
 
 ### 2.7 Record and queue
 
-Generate `reply_id` as `YYYYMMDD-HHMM-<4char>`. Append a row to `data/csv/replies.csv`:
+Generate `reply_id` as `YYYYMMDD-HHMM-<4char>`. Append a row to `data/csv/replies.csv`. The table below documents what this mode writes at draft time; the CSV column set and the `status` enum are owned in code by `dashboard/tables.py` (schema source of truth, per `docs/file-map.md`).
 
 | Column | Value at draft time |
 |---|---|
@@ -134,20 +145,7 @@ Then write `data/drafts/<reply_id>.md` using the template in §3.
 
 ## 3. Draft file template
 
-```markdown
-# Draft <reply_id>
-**Target**: <target_tweet_url>
-**Author**: @<handle> — <category>, <follower_tier>, relevance <n>, credibility <n>
-**Tweet**: <quoted/paraphrased text of the target tweet>
-**Format**: <reply|thread_reply|quote>        **Archetype**: <archetype>        **Tagging**: <none | @handle>
-
----
-<draft text — exactly what would be typed into the reply box>
----
-
-Alt (different angle, optional):
-<one alternate>
-```
+The reply/thread/quote draft template is owned by the prose spec in [docs/file-map.md](../docs/file-map.md) (Draft Markdown Template) and, in code, by `dashboard/draft_file.py` (class `DraftFile`). Write the file to match that template exactly — do not restate its fields here.
 
 Additional lines, only when applicable, go directly under the Format/Archetype/Tagging line:
 
@@ -156,11 +154,7 @@ Additional lines, only when applicable, go directly under the Format/Archetype/T
 
 ## 4. Session stop conditions
 
-Check after every drafted item (and between candidates that were skipped, since time still passes while scrolling):
-- `len(replies.csv rows with drafted_at in this session) >= max_drafts_per_session` → stop.
-- elapsed session time `>= session_time_limit_minutes` → stop.
-
-Whichever comes first ends the session. Stopping mid-loop is normal — there is no partial-candidate state to clean up, since steps only write to disk at 2.7 (after a candidate is fully decided).
+Session caps and the stop-logic are owned by AGENTS.md §3.5. For `scroll`, the two relevant caps are `max_drafts_per_session` and `session_time_limit_minutes`. Check them after every drafted item, and between candidates that were skipped too (time still passes while scrolling): count `replies.csv` rows with `drafted_at` in this session against `max_drafts_per_session`, and elapsed session time against `session_time_limit_minutes`. Stopping mid-loop is normal — there is no partial-candidate state to clean up, since steps only write to disk at 2.7 (after a candidate is fully decided).
 
 ---
 

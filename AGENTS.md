@@ -1,6 +1,6 @@
 # AGENTS.md — Twitter Engagement Agent
 
-last_updated: 2026-06-18
+last_updated: 2026-07-10
 file_map: [docs/file-map.md](docs/file-map.md)
 
 This file is the behavior contract for any agent operating in this folder. Read this file and [docs/file-map.md](docs/file-map.md) before changing or running anything. `docs/file-map.md` is the source of truth for what belongs in each file and where private/persona-specific data lives.
@@ -91,11 +91,11 @@ Cold-start study of the persona's own tweets, replies, Likes, and network. **Ful
 
 ### 4.2 Mode: `scroll`
 
-Browse the timeline, select tweets per `guidelines/target-posts.md`, and draft replies/thread-replies/quotes into the queue. **Full procedure: [modes/scroll.md](modes/scroll.md)**. Pass `--tagging` to enable `guidelines/tagging-playbook.md` exploration for this session. Per candidate: target filter → duplicate/staleness guard (§5.2) → profile check/engage gate (`guidelines/profile-rubric.md`) → format decision → archetype decision (`guidelines/reply-playbook.md`) → draft (calibrate against the archetype's real examples for register only, then voice guide → style doc → framing/engagement pass against `## Framing patterns (from Likes)` → Anti-AI Bible, hard gate) → append to `data/csv/replies.csv` and write `data/drafts/<reply_id>.md`. Stops when `max_drafts_per_session` or `session_time_limit_minutes` is hit, whichever first.
+Browse the timeline, select tweets per `guidelines/target-posts.md`, and draft replies/thread-replies/quotes into the queue. **Full procedure: [modes/scroll.md](modes/scroll.md)**. Pass `--tagging` to enable `guidelines/tagging-playbook.md` exploration for this session. Per candidate: target filter → duplicate/staleness guard (§5.2) → profile check/engage gate (`guidelines/profile-rubric.md`) → format decision → archetype decision (`guidelines/reply-playbook.md`) → draft (the drafting pipeline is owned by `modes/scroll.md` §2.6) → append to `data/csv/replies.csv` and write `data/drafts/<reply_id>.md`. Session caps stop the run per §3.5.
 
 ### 4.3 Mode: `compose`
 
-Draft original tweets, no browsing of targets required (persona's own timeline read for context only). Topic/hook selection per `guidelines/compose-playbook.md`, drafting pipeline same as [modes/scroll.md](modes/scroll.md) §2.6 (calibrate against the voice guide's Twitter/X examples for register only, then voice guide → style doc → framing/engagement pass against `## Framing patterns (from Likes)` → Anti-AI Bible), append to `data/csv/tweets.csv`, write the draft file. **Full procedure: [modes/compose.md](modes/compose.md)**. Does not take `--tagging` (scroll-only, `guidelines/tagging-playbook.md`). Same session caps apply.
+Draft original tweets, no browsing of targets required (persona's own timeline read for context only). Topic/hook selection per `guidelines/compose-playbook.md`; the drafting pipeline is owned by [modes/scroll.md](modes/scroll.md) §2.6 (compose applies it per `modes/compose.md` §2), append to `data/csv/tweets.csv`, write the draft file. **Full procedure: [modes/compose.md](modes/compose.md)**. Does not take `--tagging` (scroll-only, `guidelines/tagging-playbook.md`). Session caps per §3.5.
 
 ### 4.4 Mode: `send`
 

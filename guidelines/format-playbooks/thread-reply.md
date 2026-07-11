@@ -1,7 +1,7 @@
 # Format Playbook — Thread Reply
 
-last_updated: 2026-06-18
-status: hand-seeded
+last_updated: 2026-07-10
+status: hand-seeded — owns the read-full-thread hard rule; all other reply rules defer to `reply.md`
 
 A thread reply is a reply to a tweet that is itself part of a thread — the target tweet is one tweet in a longer argument, not a standalone post.
 

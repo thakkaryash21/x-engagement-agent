@@ -1,6 +1,6 @@
 # File Map And Data Ownership
 
-last_updated: 2026-06-18
+last_updated: 2026-07-10
 status: canonical routing guide for agents and maintainers
 
 This project is file-backed. CSV files, Markdown files, YAML files, and draft files are all part of the database. Do not move, rename, or change their schemas/templates casually. If a schema or template needs to change, document the change first and update every reader/writer together.
@@ -35,7 +35,7 @@ Do not put private persona/company data in `config/`.
 `data/` is ignored by git. It is the private runtime database:
 
 - `data/personas/<name>.md`: persona identity, handle, Chrome profile, voice guide path, style doc path, company facts path, territory, goals, and red lines.
-- `data/company-facts.md`: verified company/product facts. Any factual company claim in a draft must trace here or to another local source named by the persona.
+- `data/company-facts.md`: verified company/product facts. Per the no-fact-invention rule (AGENTS.md §6), any factual company claim in a draft must trace here or to another local source named by the persona.
 - `data/style/<persona>-twitter-style.md`: learned voice/style rules from `learn` and human edits. This is a drafting cornerstone.
 - `data/writing/**/*.md`: private writing guides, voice guides, anti-AI guidance, and iteration rules.
 - `data/learnings/content-playbook.md`: content patterns learned from review and human audit.
@@ -61,7 +61,11 @@ Markdown under `data/` is database state. Preserve headings and metadata fields 
 
 Do not change CSV headers without updating every mode, dashboard reader/writer, example CSV, and this document.
 
+**Executable owner:** the CSV schemas (column order) and the draft-status enum are owned in code by `dashboard/tables.py` (the `tables` definitions and `STATUS` enum). The mode column tables (`modes/scroll.md` §2.7, `modes/compose.md` §3, `modes/review.md`) describe what each mode writes at each stage, but `dashboard/tables.py` is the schema source of truth — if a header or `status` value changes, update it there and reconcile this document and every mode table with it.
+
 ## Draft Markdown Template
+
+This section is the canonical **prose** spec for the draft file layout. In code, the parse/serialize implementation is owned by `dashboard/draft_file.py` (class `DraftFile`); the mode docs (`modes/scroll.md` §3, `modes/compose.md` §3) reference this section rather than restating the template. Keep all three in sync when the template changes.
 
 Reply/thread/quote drafts use this structure:
 
@@ -94,7 +98,7 @@ Alt (different angle, optional):
 <one alternate — non-thread drafts only>
 ```
 
-The dashboard parses and rewrites draft bodies around the `---` separators. Do not change this template without updating the dashboard and mode docs.
+The dashboard parses and rewrites draft bodies around the `---` separators (implemented in `dashboard/draft_file.py`). Do not change this template without updating `dashboard/draft_file.py`, the dashboard, and the mode docs together.
 
 ## Public Examples
 

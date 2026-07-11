@@ -1,6 +1,6 @@
 # Mode: `send` — review, edit, post
 
-last_updated: 2026-06-18
+last_updated: 2026-07-10
 status: hand-authored procedure for AGENTS.md §4.4
 entry point: AGENTS.md §4.4 links here for the full procedure
 
@@ -95,7 +95,7 @@ Before proceeding to §3 on send/edit: if `sends_today >= max_sends_per_day`, or
 If `user_edited=true`, don't wait for `review` — the human just told you what was wrong. Diff `draft_text` against `final_text` and write the pattern immediately to `data/style/<persona>-twitter-style.md`:
 
 - If the edit reflects a phrasing/voice pattern not yet in the style doc, add it under `## Tentative`.
-- If a `## Tentative` pattern now has **3 occurrences** (this edit plus prior `learn`/`review`/send-mode entries describing the same pattern), promote it to `## Confirmed`, per the same promotion rule `learn` mode uses (`modes/learn.md` §4).
+- If a `## Tentative` pattern (counting this edit plus prior `learn`/`review`/send-mode entries describing the same pattern) reaches the promotion threshold, promote it to `## Confirmed` per the promotion rule owned by `modes/learn.md` §4.
 - If the edit **contradicts** an existing `## Confirmed` or `## Tentative` rule, rewrite that rule in place per the correction rule in `docs/file-map.md` / `modes/review.md` and add a line to `## Correction log` — never leave the contradicted rule standing with the correction appended after it.
 
 This keeps the style doc as the single home for voice/phrasing learnings regardless of which mode surfaced them (`send`, `review`, or `learn`).

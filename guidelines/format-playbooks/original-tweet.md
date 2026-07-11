@@ -1,6 +1,6 @@
 # Format Playbook — Original Tweet
 
-last_updated: 2026-06-18
+last_updated: 2026-07-10
 status: hand-seeded
 
 An original tweet (drafted in `compose` mode) has no target tweet — it's posted to the persona's own timeline, for their own followers. Topic and hook selection live in `compose-playbook.md`; this file covers format-specific writing rules once a topic/hook is chosen.
@@ -13,7 +13,7 @@ An original tweet (drafted in `compose` mode) has no target tweet — it's poste
 
 ## What breaks this format
 
-- Thread-baiting ("a thread on X (1/12)") or generic engagement-bait questions — explicitly against the voice guide and the anti-engagement-bait rule (AGENTS.md §6).
+- Thread-baiting ("a thread on X (1/12)") or generic engagement-bait questions — explicitly against the voice guide and the anti-engagement-bait rule (`guidelines/target-posts.md` → Format signals / Skip signals).
 - Treating an original tweet as a delayed reply to something seen during `scroll` without making it stand alone — if the thought only makes sense in reply to something specific, it belongs in `scroll`'s queue, not `compose`'s.
 
 

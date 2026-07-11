@@ -1,6 +1,6 @@
 # Mode: `review` — the 5-day feedback loop
 
-last_updated: 2026-06-18
+last_updated: 2026-07-10
 status: hand-authored procedure for AGENTS.md §4.5
 entry point: AGENTS.md §4.5 links here for the full procedure
 
@@ -21,6 +21,8 @@ Writes to:
 Session Bootstrap (AGENTS.md §4.0) has run. `review` does not run the Cold-Start Guard (§5.1) — it analyzes what already happened, it doesn't draft.
 
 Read `config/metrics.yaml` for `capture.layer1` / `capture.layer2` (what to record) and `optimize` (what each format is judged on).
+
+The `metrics.csv` column set and the `status` enum on `replies.csv`/`tweets.csv` are owned in code by `dashboard/tables.py` (schema source of truth, per `docs/file-map.md`) — this mode's captures and `status`/`reviewed_at` stamps must match it.
 
 ## 1. Find due items
 
@@ -59,7 +61,7 @@ Group by (`sent_day_of_week`, `sent_hour_local`, `content_type`/`tweet_format`).
 
 ### 3.4 Target author rubric scores × outcomes → tune `profile-rubric.md`
 
-Join `target_author_handle` to `data/csv/profiles.csv` for its rubric scores (relevance, credibility, audience_activity, relationship), and compare against `engagement_rate`/outcomes for items targeting that author. If a combination of scores below the current engage gate (`relevance >= 3 AND credibility >= 3 AND (audience_activity >= 3 OR relationship != none)`) is performing as well as combinations that pass it, that's evidence the gate threshold is too strict (or too loose, in the other direction). Per the correction rule, **rewrite the gate formula in `guidelines/profile-rubric.md` in place** when evidence is `high` confidence — don't add a second, competing formula.
+Join `target_author_handle` to `data/csv/profiles.csv` for its rubric scores (relevance, credibility, audience_activity, relationship), and compare against `engagement_rate`/outcomes for items targeting that author. If a combination of scores below the current engage gate (owned by `guidelines/profile-rubric.md` → Engage decision) is performing as well as combinations that pass it, that's evidence the gate threshold is too strict (or too loose, in the other direction). Per the correction rule, **rewrite the gate formula in `guidelines/profile-rubric.md` in place** when evidence is `high` confidence — don't add a second, competing formula.
 
 ### 3.5 User-edited drafts × performance → fold into the style doc
 
