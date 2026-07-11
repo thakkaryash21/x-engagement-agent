@@ -29,3 +29,13 @@ Both entries below are deferred by an explicit product decision (Plan 08 Decisio
   - **AI-detector probe** — a weak tell-tracker followed as a *trend* only, never a target to game; the human send-gate is the backstop (AGENTS.md §1).
 - **Why deferred:** an authenticity ensemble is a measurement feature that only produces a trustworthy trend once a real history of sent drafts has accumulated. With few or no sent drafts there is no signal to read and no divergence to surface.
 - **When it gets built:** once enough drafts have been sent (via `send` mode) and reviewed that a per-session ensemble read has real inputs — and once the shared NLI scorer/threshold is chosen (it is the same component the drafting-side self-consistency check in `scroll.md` §2.6 also awaits, so both should be wired together). At that point, replace §7's PLANNED framing with the executable procedure and add the authenticity-dashboard write target to `review.md`'s "Writes to" list.
+
+---
+
+## Known follow-ups (minor)
+
+Small engineering follow-ups surfaced by review — none block running the subsystem; fix opportunistically.
+
+1. **Atomic reindex swap** (`dashboard/context_store.py`, `reindex`). The rebuild drops the live table then re-creates + re-adds rows; if the re-add fails after the drop, the index is gone until the next `reindex`. Prefer building/validating a temp table and renaming it over the live one so the swap is crash-safe. (Files stay authoritative — recovery is always a `reindex` away — hence minor.)
+2. **Layer-3 provenance-row writer** (`data/csv/context-provenance.csv`). `scroll` §2.7 records the review-index row, but there is no CLI subcommand for it — the agent appends a schema-coupled row by hand, which can drift from `dashboard/tables.py::COLUMNS_CONTEXT_PROVENANCE`. Add a `context_cli provenance` subcommand that appends through the `tables.py` schema owner.
+3. **LanceDB deprecations** (`dashboard/context_store.py`). `table_names()` and `create_fts_index(..., use_tantivy=False)` are deprecated in the installed LanceDB; migrate to `list_tables()` / the current FTS API before an upgrade breaks `reindex`/hybrid retrieval.

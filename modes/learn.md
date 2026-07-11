@@ -198,7 +198,7 @@ This pass exists because an empty memory store cold-starts drafting: without it,
 For each sampled item, do three things (all via the context CLI — the runtime bridge over `ContextMemory` — which distills each finding into a chunk, dedups/merges, applies the promotion gate, and preserves raw evidence). Pipe a JSON request on stdin:
 
 ```powershell
-'{"findings": [ ... ]}' | python -m dashboard.context_cli write-back
+'{"findings": [ ... ]}' | python -m dashboard.context_cli write-back --persona <persona>
 ```
 
 (No `--reply-id` here — seeding writes durable dossiers/chunks, not a per-draft brief. The three writes below are just three kinds of `findings` in that same call.)
@@ -207,7 +207,7 @@ For each sampled item, do three things (all via the context CLI — the runtime 
 - **(b) Seed SELF memory.** Extract the self-facts the item *expressed* — a project mentioned, a lesson stated, an opinion taken, a relationship shown — and write `scope=self` chunks with `source_type=persona_history` and `confidence` set by how explicit the statement was (a stated outcome is `high`; an implied stance is `medium`/`low`). This is the primary way the Self store gets populated. Because every self chunk traces to the persona's own documented words (and carries `provenance` + an `evidence_id` to the preserved excerpt), it satisfies the no-invention contract by construction — this is what makes the "only reference documented experiences" red line (AGENTS.md §6) enforceable rather than aspirational. Never invent a self-fact to fill a gap; an unresolved personal claim is left out.
 - **(c) Capture CONTENT LOGIC.** Record *why this item said what it said* — which World-context plus which Self-experience produced which content/angle. This is the bridge between the two wells and the archetype decision (it teaches *which well to draw from for which situation*), and it is written to `data/learnings/content-playbook.md` under `## What/why content` (see that file for the entry format). Example shape (persona-neutral): "when a launch tweet in territory X appears, the persona replies with a lived-experience value-add drawn from their own shipping story, not a generic take."
 
-**Findings shape (what to pass in `findings`).** Each finding is a dict with at least `text` plus the metadata fields the write-back schema owns — `scope` (`world` | `self`), `source_type`, `context_type`, `confidence`, `importance` (durability 0–1: a lasting lesson rates high, a passing detail low), `entities`, `provenance`, and `subject_slug` for world chunks; include the raw `evidence` (the on-X snapshot captured browser-only, or the persona-history excerpt) so the immutable evidence record is written. Let the promotion gate decide persistence — durable, reusable knowledge promotes to a dossier/the retrievable store; a one-off detail stays evidence/brief-only and never pollutes memory.
+**Findings shape (what to pass in `findings`).** Each finding is a dict with at least `text` plus the metadata fields the write-back schema owns — `scope` (`world` | `self`), `source_type`, `context_type`, `confidence`, `importance` (durability 0–1: a lasting lesson rates high, a passing detail low), `entities`, `provenance`, and `subject_slug` for world chunks (plus **`persona` — required for every `scope=self` chunk** so self memory is isolated per persona and routed to `self/<persona>/`; `--persona <persona>` on the call stamps it defensively); include the raw `evidence` (the on-X snapshot captured browser-only, or the persona-history excerpt) so the immutable evidence record is written. Let the promotion gate decide persistence — durable, reusable knowledge promotes to a dossier/the retrievable store; a one-off detail stays evidence/brief-only and never pollutes memory.
 
 ### 6.2 Bounded, sampled, budgeted, resumable
 
@@ -223,7 +223,7 @@ Seeding can span the persona's entire history, so it must be incremental — nev
 At the end of each seeding batch, run reflection over the subjects and the persona the batch just touched, via the context CLI:
 
 ```powershell
-python -m dashboard.context_cli reflect --scope self --subject <persona>     # consolidate the persona's stances
+python -m dashboard.context_cli reflect --scope self --persona <persona>     # consolidate this persona's stances (self reflection is per-persona; --subject does NOT select a persona)
 python -m dashboard.context_cli reflect --scope world --subject <slug>        # per recurring subject the batch enriched
 ```
 
