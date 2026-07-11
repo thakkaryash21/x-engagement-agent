@@ -74,6 +74,11 @@ COLUMNS_LEARN_PROGRESS = (
     "last_processed_item_url", "items_processed", "session_count", "notes",
 )
 
+COLUMNS_CONTEXT_PROVENANCE = (
+    "reply_id", "context_used", "gap_type", "n_lookups", "source_types",
+    "dossier_slugs", "scope_blend",
+)
+
 
 @dataclass(frozen=True)
 class TableSpec:
@@ -90,8 +95,14 @@ METRICS = TableSpec("csv/metrics.csv", COLUMNS_METRICS, "item_id")
 PROFILES = TableSpec("csv/profiles.csv", COLUMNS_PROFILES, "handle")
 INCIDENTS = TableSpec("csv/incidents.csv", COLUMNS_INCIDENTS, "incident_id")
 LEARN_PROGRESS = TableSpec("csv/learn-progress.csv", COLUMNS_LEARN_PROGRESS, "persona")
+CONTEXT_PROVENANCE = TableSpec(
+    "csv/context-provenance.csv", COLUMNS_CONTEXT_PROVENANCE, "reply_id"
+)
 
-ALL_SPECS = (REPLIES, TWEETS, METRICS, PROFILES, INCIDENTS, LEARN_PROGRESS)
+ALL_SPECS = (
+    REPLIES, TWEETS, METRICS, PROFILES, INCIDENTS, LEARN_PROGRESS,
+    CONTEXT_PROVENANCE,
+)
 
 
 class Table:

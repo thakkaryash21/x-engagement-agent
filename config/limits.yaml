@@ -11,3 +11,5 @@ max_seconds_between_actions: 8
 min_minutes_between_sends: 10
 min_hours_between_same_author: 24 # duplicate-engagement guard (AGENTS.md §5.2)
 draft_staleness_hours: 12 # stale-draft flag threshold (AGENTS.md §5.3)
+max_context_lookups_per_session: 8 # hard cap on expensive context enrichments per session: each on-X discourse research pass (scroll adapter b) and each off-X --search (adapter c) counts as one; dossier reads and in-tab navigation are free (see AGENTS.md §3.5 / guidelines/context-enrichment.md §5-§6)
+context_research_time_budget_minutes: 15 # wall-clock sub-budget for on-X discourse-research tab passes, since each is a full burst-pause reading session (see AGENTS.md §3.5 / guidelines/context-enrichment.md §5-§6)

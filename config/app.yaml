@@ -1,4 +1,6 @@
 data_root: data
 agent_command: codex
+# agent_web_search: enable Codex native off-X web search for the Context Brief (modes/scroll.md §2.4b)
+agent_web_search: true
 dashboard_port: 8787
 

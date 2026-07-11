@@ -1,3 +1,9 @@
 fastapi>=0.115,<1.0
 uvicorn[standard]>=0.34,<1.0
 
+# Context-enrichment retrieval substrate (see guidelines/context-enrichment.md): local, in-process,
+# no cloud, no network at query time. LanceDB = embedded vector/full-text store;
+# fastembed = bundled ONNX embeddings (downloads a model on first use only).
+lancedb>=0.34,<1.0
+fastembed>=0.8,<1.0
+

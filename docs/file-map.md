@@ -15,6 +15,7 @@ These files are committed and define reusable behavior:
 - `docs/data-boundary.md`: public/private boundary and publish checks.
 - `modes/*.md`: exact operating procedures for `learn`, `scroll`, `compose`, `send`, and `review`.
 - `guidelines/*.md`: reusable public playbooks and rubrics.
+- `guidelines/context-enrichment.md`: persona-neutral context-acquisition intelligence (context-type taxonomy, source-selection matrix, query-construction playbook, the four adapters + gap router) driving `modes/scroll.md` §2.4b.
 - `guidelines/format-playbooks/*.md`: format-specific drafting rules.
 - `dashboard/README.md`: dashboard behavior and limitations.
 
@@ -58,6 +59,7 @@ Markdown under `data/` is database state. Preserve headings and metadata fields 
 - `profiles.csv`: studied author/account profiles.
 - `incidents.csv`: browser/account/security/UI incidents and lockout state.
 - `learn-progress.csv`: resumable learn-mode progress.
+- `context-provenance.csv`: Layer 3 context-enrichment review index, keyed to `reply_id` (join to `replies.csv`) — records `context_used`, `gap_type`, `n_lookups`, `source_types`, `dossier_slugs`, and `scope_blend` (world/self/both) for context→engagement joins in `review` mode.
 
 Do not change CSV headers without updating every mode, dashboard reader/writer, example CSV, and this document.
 

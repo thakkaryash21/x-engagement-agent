@@ -39,7 +39,12 @@ class RunLauncher:
             prompt += " --tagging"
 
         agent_command = self.paths.app_config.get("agent_command", "codex")
-        run_cmd = f"Set-Location -LiteralPath '{self.paths.root}'; {agent_command} '{prompt}'"
+        # Enable Codex native off-X web search for the Context Brief when opted in
+        # via config/app.yaml agent_web_search; see guidelines/context-enrichment.md §5
+        # adapter (c). read_simple_yaml yields string values.
+        web_search = str(self.paths.app_config.get("agent_web_search", "")).strip().lower() in ("true", "1", "yes", "on")
+        invocation = f"{agent_command} --search '{prompt}'" if web_search else f"{agent_command} '{prompt}'"
+        run_cmd = f"Set-Location -LiteralPath '{self.paths.root}'; {invocation}"
         subprocess.Popen(f'start "X Engagement Agent" powershell -NoExit -Command "{run_cmd}"', shell=True)
         state = {"last_launch": {
             "mode": mode,

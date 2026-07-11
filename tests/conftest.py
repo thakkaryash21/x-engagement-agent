@@ -3,12 +3,50 @@
 from __future__ import annotations
 
 import csv
+import math
+import re
+import zlib
 from pathlib import Path
+from typing import Sequence
 
 import pytest
 
 from dashboard import tables
 from dashboard.file_store import DashboardStore
+
+
+class FakeEmbedder:
+    """Deterministic, offline embedder for context tests.
+
+    Hashes each token into a fixed-width bag-of-words vector and L2-normalizes,
+    so texts that share words land close (cosine ~ shared-token overlap) and
+    unrelated texts land far. No model download, fully reproducible within a
+    run — exactly why ContextStore takes the embedder as a constructor arg.
+    """
+
+    def __init__(self, dim: int = 32) -> None:
+        self._dim = dim
+
+    @property
+    def dim(self) -> int:
+        return self._dim
+
+    def embed(self, texts: Sequence[str]) -> list[list[float]]:
+        out: list[list[float]] = []
+        for text in texts:
+            vector = [0.0] * self._dim
+            for token in re.findall(r"[a-z0-9]+", (text or "").lower()):
+                vector[zlib.crc32(token.encode()) % self._dim] += 1.0
+            norm = math.sqrt(sum(component * component for component in vector))
+            if norm:
+                vector = [component / norm for component in vector]
+            out.append(vector)
+        return out
+
+
+@pytest.fixture
+def fake_embedder() -> FakeEmbedder:
+    return FakeEmbedder()
 
 APP_YAML = "data_root: data\nagent_command: codex\ndashboard_port: 8787\n"
 
