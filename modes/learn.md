@@ -1,6 +1,6 @@
 # Mode: `learn` — cold-start procedure
 
-last_updated: 2026-07-10
+last_updated: 2026-07-11
 status: hand-authored procedure for AGENTS.md §4.1
 entry point: AGENTS.md §4.1 links here for the full procedure
 
@@ -14,7 +14,7 @@ entry point: AGENTS.md §4.1 links here for the full procedure
 - `data/learnings/engagement-targets.md` (historical patterns + incentive classification)
 - `data/csv/profiles.csv` (interaction-graph rows)
 - `data/csv/incidents.csv` (if an anomaly halts the session, AGENTS.md §6)
-- the **context memory subsystem** (§6, via `ContextMemory.write_back`): World subject dossiers/chunks and the persona's `scope=self` experiential store, consolidated by `ContextMemory.reflect`. This warm-starts the memory the drafting pipeline reads at draft time, so early `scroll` sessions are not cold.
+- the **context memory subsystem** (§6, via the context CLI's `write-back`): World subject dossiers/chunks and the persona's `scope=self` experiential store, consolidated by the CLI's `reflect`. This warm-starts the memory the drafting pipeline reads at draft time, so early `scroll` sessions are not cold.
 
 `learn` is re-runnable to refresh any of the above. Re-running extends and corrects per the correction rule — it never duplicates.
 
@@ -189,19 +189,25 @@ Evidence handling:
 
 ## 6. Context seeding — warm the memory subsystem (World + Self)
 
-`learn` is a **second entry point into the same context memory subsystem** the drafting pipeline reads at draft time — not a parallel one. It reuses the same acquisition intelligence (context-type taxonomy → source matrix → targeted queries) and the **same unified write-back** (`ContextMemory.write_back`) that live drafting uses; the only difference is that it is pointed at *past* history instead of a live candidate. So chunk schema, dedup/merge, and the promotion gate are all reused unchanged, and re-processing a tweet **merges** (bumps `last_refreshed`) rather than duplicating — the pass is idempotent by construction.
+`learn` is a **second entry point into the same context memory subsystem** the drafting pipeline reads at draft time — not a parallel one. It reuses the same acquisition intelligence (the context-type taxonomy → source matrix → gap router → query playbook owned by `guidelines/context-enrichment.md` — read it there, this mode does not restate it) and the **same unified write-back** (the context CLI's `write-back`, over `ContextMemory`) that live drafting uses; the only difference is that it is pointed at *past* history instead of a live candidate. So chunk schema, dedup/merge, and the promotion gate are all reused unchanged, and re-processing a tweet **merges** (bumps `last_refreshed`) rather than duplicating — the pass is idempotent by construction.
 
 This pass exists because an empty memory store cold-starts drafting: without it, early `scroll` sessions pay full enrichment cost against an empty store and the persona's Self well stays empty. Seeding fills both wells from the persona's own documented history.
 
 ### 6.1 Per sampled historical tweet/reply — three writes
 
-For each sampled item, do three things (all via `ContextMemory.write_back`, which distills each finding into a chunk, dedups/merges, applies the promotion gate, and preserves raw evidence):
+For each sampled item, do three things (all via the context CLI — the runtime bridge over `ContextMemory` — which distills each finding into a chunk, dedups/merges, applies the promotion gate, and preserves raw evidence). Pipe a JSON request on stdin:
 
-- **(a) Seed WORLD dossiers.** Reconstruct the context the item was *responding to* — the subject/event/discourse/jargon it referenced at the time — using the World adapters (in-tab reading of the original thread; a bounded off-X or on-X lookup only when the reference doesn't resolve from the item alone). Write `scope=world` chunks tagged with the subject and its `context_type` (`identity` / `factual` / `temporal` / `cultural`). Result: when `scroll` later meets a similar subject, memory is warm, not cold.
+```powershell
+'{"findings": [ ... ]}' | python -m dashboard.context_cli write-back
+```
+
+(No `--reply-id` here — seeding writes durable dossiers/chunks, not a per-draft brief. The three writes below are just three kinds of `findings` in that same call.)
+
+- **(a) Seed WORLD dossiers.** Reconstruct the context the item was *responding to* — the subject/event/discourse/jargon it referenced at the time — routing each gap through the World adapters and context-type taxonomy owned by `guidelines/context-enrichment.md` (§2 taxonomy, §5 adapters/router), here pointed at *past* history rather than a live candidate (in-tab reading of the original thread is free; a bounded off-X or on-X lookup counts against budget and only when the reference doesn't resolve from the item alone). Write `scope=world` chunks tagged with the subject and its `context_type`. Result: when `scroll` later meets a similar subject, memory is warm, not cold.
 - **(b) Seed SELF memory.** Extract the self-facts the item *expressed* — a project mentioned, a lesson stated, an opinion taken, a relationship shown — and write `scope=self` chunks with `source_type=persona_history` and `confidence` set by how explicit the statement was (a stated outcome is `high`; an implied stance is `medium`/`low`). This is the primary way the Self store gets populated. Because every self chunk traces to the persona's own documented words (and carries `provenance` + an `evidence_id` to the preserved excerpt), it satisfies the no-invention contract by construction — this is what makes the "only reference documented experiences" red line (AGENTS.md §6) enforceable rather than aspirational. Never invent a self-fact to fill a gap; an unresolved personal claim is left out.
 - **(c) Capture CONTENT LOGIC.** Record *why this item said what it said* — which World-context plus which Self-experience produced which content/angle. This is the bridge between the two wells and the archetype decision (it teaches *which well to draw from for which situation*), and it is written to `data/learnings/content-playbook.md` under `## What/why content` (see that file for the entry format). Example shape (persona-neutral): "when a launch tweet in territory X appears, the persona replies with a lived-experience value-add drawn from their own shipping story, not a generic take."
 
-**Findings shape (what to pass to `write_back`).** Each finding is a dict with at least `text` plus the metadata fields the write-back schema owns — `scope` (`world` | `self`), `source_type`, `context_type`, `confidence`, `importance` (durability 0–1: a lasting lesson rates high, a passing detail low), `entities`, `provenance`, and `subject_slug` for world chunks; include the raw `evidence` (the on-X snapshot captured browser-only, or the persona-history excerpt) so the immutable evidence record is written. Let the promotion gate decide persistence — durable, reusable knowledge promotes to a dossier/the retrievable store; a one-off detail stays evidence/brief-only and never pollutes memory.
+**Findings shape (what to pass in `findings`).** Each finding is a dict with at least `text` plus the metadata fields the write-back schema owns — `scope` (`world` | `self`), `source_type`, `context_type`, `confidence`, `importance` (durability 0–1: a lasting lesson rates high, a passing detail low), `entities`, `provenance`, and `subject_slug` for world chunks; include the raw `evidence` (the on-X snapshot captured browser-only, or the persona-history excerpt) so the immutable evidence record is written. Let the promotion gate decide persistence — durable, reusable knowledge promotes to a dossier/the retrievable store; a one-off detail stays evidence/brief-only and never pollutes memory.
 
 ### 6.2 Bounded, sampled, budgeted, resumable
 
@@ -214,7 +220,14 @@ Seeding can span the persona's entire history, so it must be incremental — nev
 
 ### 6.3 Reflect after each seeding batch
 
-At the end of each seeding batch, call `ContextMemory.reflect(scope, subject)` over the subjects and the persona the batch just touched. Seeding *gathers* raw chunks; reflection makes them *coherent* — it synthesizes higher-level insight chunks that no single raw chunk holds (a subject's consolidated current state; the persona's recurring stance across scattered opinion chunks). Run it once per scope you seeded — `reflect(scope="self", subject=<persona-or-None>)` to consolidate the persona's stances, and `reflect(scope="world", subject=<slug>)` for each recurring subject the batch enriched. Reflections flow through the same dedup/merge, so running this every batch refines the one insight chunk instead of appending duplicates.
+At the end of each seeding batch, run reflection over the subjects and the persona the batch just touched, via the context CLI:
+
+```powershell
+python -m dashboard.context_cli reflect --scope self --subject <persona>     # consolidate the persona's stances
+python -m dashboard.context_cli reflect --scope world --subject <slug>        # per recurring subject the batch enriched
+```
+
+Seeding *gathers* raw chunks; reflection collects them into one labeled `insight` chunk per scope/subject (a subject's consolidated current state; the persona's recurring stance across scattered opinion chunks). **Interim behaviour (planned/not-yet-executable synthesis):** today this is a *simple concatenating consolidation* — the `insight` text is a labeled join of the source chunks' texts, not a distilled higher-level abstraction. Real synthesis (an insight beyond the union of the source texts) is a deferred roadmap feature (`docs/roadmap.md` → Deferred); the chunk is honestly labeled `context_type=insight` so consumers can tell interim consolidation from the future pass. Run it once per scope you seeded (omit `--subject` to consolidate a whole scope). Reflections flow through the same dedup/merge, so running this every batch refreshes the one insight chunk instead of appending duplicates.
 
 Sequencing note: an empty Self store simply means world-only drafting (safe) — but running this seeding pass with its reflection *before* trusting `scroll`'s self-retrieval is what makes the Self well actually useful.
 
