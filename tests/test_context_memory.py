@@ -472,6 +472,44 @@ def test_self_dedup_isolated_by_persona(store: ContextStore, memory: ContextMemo
     assert len(list(store.chunks_dir.glob("*.md"))) == 2
 
 
+def test_retrieve_content_both_isolated_by_persona(store: ContextStore, memory: ContextMemory):
+    """scope=both (the documented draft path, mapped to scope=None) must STILL
+    isolate self memory by persona — a named persona never sees another persona's
+    self chunk (review Finding A: the combined path applied no persona filter)."""
+    for persona, cid in (("alice", "alice1"), ("bob", "bob1")):
+        store.add(
+            f"{persona} rebuilt onboarding and doubled conversion",
+            {"scope": "self", "persona": persona, "subject_slug": "onboarding",
+             "context_type": "relational", "importance": 0.6, "entities": ["onboarding"],
+             "created_at": NOW.isoformat(), "last_refreshed": NOW.isoformat(),
+             "chunk_id": cid},
+        )
+    alice_hits = memory.retrieve_content("onboarding conversion", scope=None,
+                                         persona="alice", k=8)
+    assert {h["chunk_id"] for h in alice_hits} == {"alice1"}
+    assert all(h.get("persona") == "alice" for h in alice_hits if h.get("scope") == "self")
+
+
+def test_reflect_self_isolated_by_persona(store: ContextStore, memory: ContextMemory):
+    """reflect(scope=self) consolidates ONE persona's memory in isolation and refuses
+    to run without a persona (review Finding B: it fused all personas into one
+    misattributed insight)."""
+    for persona in ("alice", "bob"):
+        store.add(
+            f"{persona} rebuilt onboarding and doubled conversion",
+            {"scope": "self", "persona": persona, "subject_slug": f"{persona}-onboarding",
+             "context_type": "relational", "importance": 0.6, "entities": ["onboarding"],
+             "created_at": NOW.isoformat(), "last_refreshed": NOW.isoformat(),
+             "chunk_id": f"{persona}1"},
+        )
+    insight = memory.reflect("self", persona="alice")
+    assert insight is not None
+    assert insight["persona"] == "alice"
+    assert "alice" in insight["text"] and "bob" not in insight["text"]
+    # Without a persona, self-consolidation is refused (never mixes personas).
+    assert memory.reflect("self") is None
+
+
 # --- Plan 08 fix 8: hybrid (dense + lexical) retrieval ------------------------
 
 def test_hybrid_retrieval_exact_token_beats_semantic_distractor(tmp_path: Path):

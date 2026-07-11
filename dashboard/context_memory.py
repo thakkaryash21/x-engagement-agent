@@ -396,7 +396,7 @@ class ContextMemory:
 
     # --- §5.5.1 reflection / consolidation ------------------------------------
 
-    def reflect(self, scope: str, subject: str | None = None) -> dict[str, Any] | None:
+    def reflect(self, scope: str, subject: str | None = None, persona: str | None = None) -> dict[str, Any] | None:
         """Consolidate a cluster of raw chunks into one labeled ``insight`` and store it.
 
         Reads (via ``store.search``) the chunks for ``scope`` (optionally a
@@ -411,13 +411,19 @@ class ContextMemory:
         is honestly labeled ``context_type=insight`` / ``source_type=reflection``
         so a reader can tell interim consolidation apart from the future pass.
         """
-        candidates = self.store.search(subject or "", k=100, filters=self._filters(scope))
+        # Persona isolation (Plan 08 fix 4 / review Finding B): self memory is
+        # per-persona — refuse to consolidate it without a persona, or one insight
+        # would fuse (and misattribute) multiple personas' lived experience.
+        if scope == "self" and not persona:
+            return None
+        candidates = self.store.search(subject or "", k=100, filters=self._filters(scope, persona=persona))
         # A reflection consolidates *raw* material, not prior insights.
         sources = [
             chunk
             for chunk in candidates
             if chunk.get("context_type") != "insight"
             and (subject is None or chunk.get("subject_slug") == subject)
+            and (scope != "self" or chunk.get("persona") == persona)
         ]
         if not sources:
             return None
@@ -454,7 +460,7 @@ class ContextMemory:
             "provenance": "reflection over: " + ",".join(source_ids),
             "evidence_id": "",
             "subject_slug": subject or "",
-            "persona": sources[0].get("persona", ""),
+            "persona": persona or "",
         }
         # §5.5.1 — reflections flow through the SAME dedup/merge as write-back so
         # repeated consolidation (learn/review run this every batch) merges into
@@ -494,6 +500,16 @@ class ContextMemory:
         dense = self.store.search(query, k=limit, filters=filters)
         lexical = self.store.search_lexical(query, k=limit, filters=filters)
         candidates = self._fuse(dense, lexical)
+        # Persona isolation on the COMBINED path (Plan 08 fix 4 / review Finding A):
+        # ``_filters`` only adds a persona clause for scope==self, but the documented
+        # draft path uses scope=both (scope=None) -> no persona clause. A caller that
+        # names a persona must never see another persona's self memory, so post-filter:
+        # keep every world chunk, but a self chunk only if it belongs to ``persona``.
+        if persona:
+            candidates = [
+                c for c in candidates
+                if c.get("scope") != "self" or c.get("persona") == persona
+            ]
         if not candidates:
             return []
 

@@ -81,6 +81,15 @@ def _cmd_write_back(memory: ContextMemory, args: argparse.Namespace) -> Any:
     findings = payload.get("findings", [])
     if not isinstance(findings, list):
         raise ValueError("`findings` must be a list")
+    # Defensive persona stamp (Plan 08 fix 4 / review Finding D): every scope=self
+    # finding MUST carry its persona (isolation + dossier routing depend on it). If
+    # --persona was passed, stamp it onto any self finding lacking one so self chunks
+    # never land under self/unknown/ or leak across personas.
+    persona = args.persona or payload.get("persona")
+    if persona:
+        for finding in findings:
+            if isinstance(finding, dict) and finding.get("scope") == "self" and not finding.get("persona"):
+                finding["persona"] = persona
     return memory.write_back(
         findings,
         reply_id=args.reply_id or payload.get("reply_id"),
@@ -94,7 +103,8 @@ def _cmd_reflect(memory: ContextMemory, args: argparse.Namespace) -> Any:
     payload = _read_payload(args)
     scope = args.scope or payload.get("scope") or "world"
     subject = args.subject or payload.get("subject")
-    return memory.reflect(scope, subject=subject)
+    persona = args.persona or payload.get("persona")
+    return memory.reflect(scope, subject=subject, persona=persona)
 
 
 def _cmd_style_exemplars(memory: ContextMemory, args: argparse.Namespace) -> Any:
