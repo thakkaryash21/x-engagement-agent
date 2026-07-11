@@ -1,5 +1,6 @@
 /data/
 /docs/superpowers/
+/tasks/
 00-requirements.md
 01-spec.md
 .venv/
