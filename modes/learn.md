@@ -6,7 +6,7 @@ entry point: AGENTS.md §4.1 links here for the full procedure
 
 `learn` is a read-only mode: it never drafts and never sends. It browses the active persona's own profile and network — Posts, Replies, and Likes tabs, plus interactions (mimicry rules, AGENTS.md §3, apply — a learn session looks like the persona re-reading their own profile) — and writes/extends:
 
-- `data/style/<persona>-twitter-style.md` (the primary output — cornerstone #2 for drafting; includes voice patterns from Posts/Replies and framing/engagement patterns from Likes, §1.5)
+- `data/style/<persona>-twitter-style.md` (the primary output — cornerstone #2 for drafting; voice patterns from Posts/Replies plus a framing taste note from Likes; the framing technique catalog itself extends the shared `data/writing/framing-structure.md`, §1.5)
 - `guidelines/reply-playbook.md` (real examples per archetype)
 - `guidelines/profile-rubric.md` (seeded taxonomy)
 - `guidelines/tagging-playbook.md` (seeded tagging examples)
@@ -104,7 +104,7 @@ Navigate to the persona's Likes tab. This pass is about **genre, not facts**: it
 1. Use `sampled_seed` scope (§0.1 above) — a representative sample of recent Likes is enough. This section is rarely worth a `full_archive` pass.
 2. Burst-pause scroll (AGENTS.md §3.2) through the Likes tab. For each liked tweet, ignore the topic and **name the framing technique that makes it land** — for example: leads with a concrete/specific detail before any abstract point, sets up a contrast or tension and resolves it in one beat, ends on a dry understatement instead of a conclusion, uses a short punchy fragment as a second sentence, states an unexpected number or fact as the hook, or undercuts its own premise.
 3. Do not record the liked tweet's topic, wording, or subject matter — only the structural technique. The same technique observed across unrelated topics (a product launch, a personal anecdote, an industry jab) is the signal that it's a genre pattern worth recording, not a one-off.
-4. A technique observed 3+ times across Likes goes in `data/style/<persona>-twitter-style.md` under `## Framing patterns (from Likes)` → `### Confirmed`; 1-2 times goes under `### Tentative`, same promotion/correction rules as the main `## Confirmed`/`## Tentative` sections (step 4 below). These stay weighted *below* the main `## Confirmed` — they shape how a point lands, never what the persona would say or whether it fits their voice/red lines.
+4. A genre technique observed 3+ times across Likes is added to the shared library `data/writing/framing-structure.md` under `## Confirmed` (1-2 times under `## Tentative`), same promotion/correction rules as the style-doc sections. Do not re-list the catalog per persona: instead record which of these techniques this persona's Likes emphasize as a short **taste** note in `data/style/<persona>-twitter-style.md` → `## Framing patterns`. These stay weighted *below* the persona's main `## Confirmed` voice rules — they shape how a point lands, never what the persona would say or whether it fits their voice/red lines.
 5. Stop the section when X stops serving more Likes, the sample feels representative (recurring techniques start repeating rather than introducing new ones), or `session_time_limit_minutes` is hit — mark `seeded` in either of the first two cases, `in_progress` in the last.
 
 ## 2. Interaction graph
@@ -149,7 +149,7 @@ This is the file the cold-start guard (AGENTS.md §5.1) checks — `scroll`/`com
 
 For each Confirmed rule, include enough evidence wording to justify the threshold. This can be examples inline or a short count phrase such as "observed across Posts, Replies, and quote posts." Do not promote a rule to Confirmed only because it feels plausible.
 
-Also write `## Framing patterns (from Likes)` from step 1.5: name each technique, with its own `### Confirmed` (3+ occurrences) / `### Tentative` (1-2) split and the same promotion/correction rules. Keep these as technique descriptions only — never the liked tweet's topic, wording, or subject matter (a technique description that names a specific person, product, or claim from a liked tweet has drifted into content, not framing — rewrite it as the abstract technique).
+Also extend the shared framing library `data/writing/framing-structure.md` from step 1.5: add any new genre technique under its `## Confirmed` (3+ occurrences) / `## Tentative` (1-2) split, same promotion/correction rules, and record the persona's **taste** (which techniques their Likes emphasize) as a short note in `data/style/<persona>-twitter-style.md` → `## Framing patterns`. Keep the library entries as technique descriptions only — never the liked tweet's topic, wording, or subject matter (a technique that names a specific person, product, or claim has drifted into content, not framing — rewrite it as the abstract technique).
 
 ## 5. Synthesize remaining seed files
 
